@@ -67,10 +67,10 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	}
 	
 	/*************************************************/
-	else if (!strcmp(cmd, "mkdir"))
-	{
+	//else if (!strcmp(cmd, "mkdir"))
+	//{
  		
-	}
+	//}
 	/*************************************************/
 	
 	else if (!strcmp(cmd, "jobs")) 
@@ -80,7 +80,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid")) 
 	{
-
+		// TBD - add parameter check and maybe change illegal_cmd = TRUE;
 		cout << "smash pid is " << getpid() << endl;
 		
 	}
