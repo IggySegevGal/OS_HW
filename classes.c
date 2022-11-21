@@ -6,12 +6,6 @@
 /* define job and jobs classes*/
 #include "classes.h"
 
-   int pid;
-   int job_id;        
-   string command;
-   time_t entry_time;
-   bool is_stopped;
-
 // ---------------------- job class functions: -----------------------------------
 	job::job() {
 		this->pid = getpid();
