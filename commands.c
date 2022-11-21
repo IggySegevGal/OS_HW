@@ -8,7 +8,7 @@
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString)
+int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -61,7 +61,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	{
 		char cwd[MAX_PATH];
 		if (getcwd(cwd,sizeof(cwd)) == NULL) {
-			perror("smash error: getcwd failed");
+			perror("smash error: getcwd failed");}
 		else
 			cout << cwd << endl;
 	}
@@ -75,19 +75,42 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	
 	else if (!strcmp(cmd, "jobs")) 
 	{
- 		
+		// ignore arguments 
+		// TBD - add parameter check and maybe change illegal_cmd = TRUE;
+		jobs.print_jobs() //a function inside jobs_class
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid")) 
 	{
+		// ignore arguments
 		// TBD - add parameter check and maybe change illegal_cmd = TRUE;
 		cout << "smash pid is " << getpid() << endl;
 		
 	}
 	/*************************************************/
-	else if (!strcmp(cmd, "fg")) 
+	else if (!strcmp(cmd, "kill")) 
 	{
-		
+		if (num_arg != 2 || args[1][0] != '-'){ // wrong num arg
+			//illegal_cmd = TRUE;
+		}
+		else {
+			string input_signal = args[1];
+			input_signal.erase(0,1); //remove '-'
+			int job_id = stoi(args[2]);
+			int job_pid = jobs.get_pid_by_job_id(job_id);
+			if (job_pid == -1){ // id not found
+				cout << "smash error: kill: job-id " << job_id << " does not exist"<<endl;
+				//illigal_command flag?????
+			}
+			else { // everything is ok, send signal
+			//int kill(job_pid, stoi(input_signal)); TBD - HOW TO SEND A SIGNAL???????? and what to do with error
+			}
+		}
+	} 
+	/*************************************************/
+	else if (!strcmp(cmd, "fg"))
+	{
+   		
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
@@ -96,6 +119,11 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
+	{
+   		
+	} 
+	/*************************************************/
+	else if (!strcmp(cmd, "diff"))
 	{
    		
 	} 

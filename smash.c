@@ -10,13 +10,14 @@ main file. This file contains the main function of smash
 #include <signal>
 #include "commands.h"
 #include "signals.h"
+#include "classes.h"
 
 const int MAX_LINE_SIZE 80;
 const int MAXARGS 20;
 using namespace std;
 
 char* L_Fg_Cmd; //cpp? 
-void* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
+jobs_class jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE]; 
 //**************************************************************************************
 // function name: main
