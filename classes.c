@@ -1,59 +1,100 @@
 // classes.c
-// contains signal handler funtions
-// contains the function/s that set the signal handlers
+// contains job & job_list classes
+// contains the functions that each method should have
 
 /*******************************************/
 /* define job and jobs classes*/
 #include "classes.h"
 
-class job {       // The class
-  public:             // Access specifier
    int pid;
    int job_id;        
    string command;
    time_t entry_time;
    bool is_stopped;
-   job(){
 
-   } // constructor,should initialize parameters
+// ---------------------- job class functions: -----------------------------------
+	job::job() {
+		this->pid = getpid();
+    this->job_id = 0;
+		this->command = string("/0");
+		this->entry_time = time(NULL);
+		this->is_stopped = FALSE;
+	}
+	job::job(int pid,int job_id,string command,time_t entry_time,bool is_stopped) {
+		this->pid = pid;
+    this->job_id = job_id;
+		this->command = command;
+		this->entry_time = entry_time;
+		this->is_stopped = is_stopped;
+	}
 
-    //bool operator< (const job &other) const { // < operator to sort jobs list
-    //  return job_id < other.job_id;
-    //}
-    //bool operator==(const& job_to_cmp) const { return this->pid == job_to_cmp.pid;}
+	job::~job() {}
+  
+  // class getters
+	int job::get_pid() {
+		return pid;
+	}
 
-};
+	int job::get_job_id() {
+		return job_id;
+	}
 
-class jobs_list {       // The class
-  public:             // Access specifier
-   vector<job> jobs_list;
-   //int job_num;
-   //int max_job_id;
-   
-   void insert_new_job(job new_job){
-       jobs_list.push_back(new_job); // insert new job to the end of the list
-       job_num = jobs_list.size(); // update list size
-   }
+	string job::get_command() {
+		return command;
+	}
 
-   void print_jobs(){
+	int job::get_time() {
+		return time(NULL)-entry_time;
+	}
+
+	bool job::get_is_stopped() {
+		return is_stopped;
+	}
+
+  
+  // ---------------------- jobs_class functions: -----------------------------------
+	jobs_class::jobs_class() {
+	this->jobs_list=NULL;
+	}
+
+	jobs_class::jobs_class(vector<job> jobs_vector) {
+		this->pid = pid;
+    this->job_id = job_id;
+		this->command = command;
+		this->entry_time = entry_time;
+		this->is_stopped = is_stopped;
+	}
+
+	jobs_class::~jobs_class() {}
+  
+  // class methods
+	void jobs_class::insert_job(job new_job) {
+      jobs_vector.push_back(new_job); // insert new job to the end of the list
+      job_num = jobs_vector.size(); // update list size
+    return;
+	}
+
+  void jobs_class::print_jobs(){
       vector<job>::iterator it;
       for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
          //print:
-         //job id
-         // command :
-         //pid
-         //seconds elapsed (using timediff())
-         // stopped (only is stopped)
-         
-         //cout << // print all the thing needed for "jobs" built in functin
-         
-         //cout << ' ' << *it;
-         //cout << '\n';}
+         cout << it->get_job_id();//job id
+         cout << it->get_command()<< ":";// command :
+         cout << it->get_pid();//pid
+         cout << it->get_time();//seconds elapsed 
+         if (get_is_stopped()){
+            cout << it->job_id;}// stopped (only is stopped)
+      };
+  };
 
-
-   }
-   
-   //int remove_job(job job_to_remove){
-   //      find(this.begin(), this.end(), job_to_remove); // OK. B::operator== exists.
-   //    jobs_list.push_back (new_job);
-   }
+   int remove_job(int job_id){ // return 0 by success and -1 if object was not found
+      vector<job>::iterator it;
+      int job_removed = -1
+      for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
+          if (it->job_id == job_id){
+            jobs_list.erase(it);
+            job_removed = 0;
+          }
+      };
+      return job_removed;
+   };
