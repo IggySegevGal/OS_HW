@@ -1,15 +1,17 @@
 #ifndef _COMMANDS_H
 #define _COMMANDS_H
-#include <unistd> 
-#include <stdio>
-#include <time>
-#include <stdlib>
-#include <signal>
+#include <unistd.h> 
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <signal.h>
 #include <string>
-#include <sys/types>
-#include <sys/wait>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include "classes.h" 
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
+using namespace std;
 //typedef enum { FALSE , TRUE } bool; replace with true false
 int ExeComp(char* lineSize);
 int BgCmd(char* lineSize, jobs_class jobs);

@@ -1,7 +1,9 @@
 //		commands.c
 //********************************************
 #include "commands.h"
-#DEFINE MAX_PATH 4096
+#define MAX_PATH 4096
+using namespace std;
+string prev_path = "no_prev";
 //********************************************
 // function name: ExeCmd
 // Description: interperts and executes built-in commands
@@ -13,9 +15,12 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	char* cmd; 
 	char* args[MAX_ARG];
 	char pwd[MAX_LINE_SIZE];
-	char* delimiters = " \t\n";  
+	char const * delimiters = " \t\n";  
 	int i = 0, num_arg = 0;
-	bool illegal_cmd = FALSE; // illegal command
+	char* curr_dir_pointer = get_current_dir_name();
+	string curr_path = curr_dir_pointer;
+	free(curr_dir_pointer);
+	bool illegal_cmd = false; // illegal command
     cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
 		return 0; 
@@ -36,23 +41,33 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	if (!strcmp(cmd, "cd") ) 
 	{
 		//check parameters
-		if (num_arg > 1) 
+		if (num_arg > 1) {
 			cout << "smash error: cd: too many arguments" << endl;
 			return 1;
-		else if (args[1] == "-")
-			if (prev_path != NULL)
-				path = prev_path; // "-" means go to prev dir
-			else
-				cout << "smash error: cd: OLDPWD not set" << endl;
-				return 1;
-			
-		else 
-			path = args[1]; // first argument is the path
-		// change dir and check if successful
-		if (chdir(path) != 0) {
-			perror("smash error: chdir failed");
-			return 1;
 		}
+		else if (!strcmp(args[1],"-")){ // if equal to "-"
+			if (!strcmp(prev_path.c_str(),"no_prev")){ // if equal - no prev_path
+				cout << "smash error: cd: OLDPWD not set" << endl;
+				return 1;	
+			}
+			else{// "-" means go to prev dir
+				// change dir and check if successful
+				if (chdir(prev_path.c_str()) != 0) {
+					perror("smash error: chdir failed");
+					return 1;
+				}
+				prev_path = curr_path;
+				return 0;
+			}
+		}
+		else{ 
+			// change dir and check if successful
+			if (chdir(args[1]) != 0) {
+				perror("smash error: chdir failed");
+				return 1;
+			}
+		}
+	prev_path = curr_path;
 	return 0;
 		
 	} 
@@ -84,7 +99,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 		// ignore arguments 
 		// TBD - add parameter check and maybe change illegal_cmd = TRUE;
 		// remove_jobs() ????????????????
-		jobs.print_jobs() //a function inside jobs_class
+		jobs.print_jobs(); //a function inside jobs_class
 		return 0;
 	}
 	/*************************************************/
@@ -165,50 +180,19 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
 	int pID;
     	switch(pID = fork()) 
 	{
-    		case -1: 
-					// Add your code here (error)
-					
-					/* 
-					your code
-					*/
-        	case 0 :
-                	// Child Process
-               		setpgrp();
-					
-			        // Add your code here (execute an external command)
-					
-					/* 
-					your code
-					*/
+    		case -1:{}
 			
-			default:
-                	// Add your code here
-					
-					/* 
-					your code
-					*/
+        	case 0:{
+			setpgrp();// Child Process		
+		}
+
+		default:{}
+
 	}
+	
 }
 //**************************************************************************************
-// function name: ExeComp
-// Description: executes complicated command
-// Parameters: command string
-// Returns: 0- if complicated -1- if not
-//**************************************************************************************
-/* int ExeComp(char* lineSize)
-{
-	char ExtCmd[MAX_LINE_SIZE+2];
-	char *args[MAX_ARG];
-    if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
-    {
-		// Add your code here (execute a complicated command)
-					
-		/* 
-		your code
-		*/
-/* 	} 
-	return -1;
-} */ //*/
+
 //**************************************************************************************
 // function name: BgCmd
 // Description: if command is in background, insert the command to jobs
@@ -219,7 +203,7 @@ int BgCmd(char* lineSize, void* jobs)
 {
 
 	char* Command;
-	char* delimiters = " \t\n";
+	char const * delimiters = " \t\n";
 	char *args[MAX_ARG];
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{

@@ -5,7 +5,7 @@
 /*******************************************/
 /* define job and jobs classes*/
 #include "classes.h"
-
+using namespace std;
 // ---------------------- job class functions: -----------------------------------
 	//constructors
 	job::job() {
@@ -54,7 +54,7 @@
 	}
 
 	jobs_class::jobs_class(vector<job> jobs_vector) {
-		this->jobs_vector = jobs_vector
+		this->jobs_vector = jobs_vector;
 	}
 
 	jobs_class::~jobs_class() {}
@@ -70,8 +70,8 @@
 
 	//print method - print all jobs in class
   void jobs_class::print_jobs(){
-      vector<job>::iterator it;
-      for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
+      std::vector<job>::iterator it;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
          //print:
          cout <<"[" << it->get_job_id()<<"]";//job id
          cout << it->get_command()<< " : ";// command :
@@ -80,30 +80,30 @@
          if (it->get_is_stopped()){
             cout << "(stopped)";}// stopped (only is stopped)
 		cout << endl;
-      };
-  };
+      }
+  }
 
 	// remove a job from jobs_class
    int jobs_class::remove_job(int job_id){ // return 0 by success and -1 if object was not found
       vector<job>::iterator it;
-      int job_removed = -1
-      for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
-          if (it->job_id == job_id){
-            jobs_list.erase(it);
+      int job_removed = -1;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() == job_id){
+            jobs_vector.erase(it);
             job_removed = 0;
           }
-      };
+      }
       return job_removed;
-   };
+   }
 
 	// get job id and return pid, return -1 if failed 
    int jobs_class::get_pid_by_job_id(int job_id) {
     vector<job>::iterator it;
 	int pid = -1;
-      for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
-          if (it->job_id == job_id){
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() == job_id){
 			pid = it->get_pid();
           }
-      };
+      }
 	return pid;
    }
