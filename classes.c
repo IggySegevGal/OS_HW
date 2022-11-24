@@ -73,10 +73,10 @@
       vector<job>::iterator it;
       for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
          //print:
-         cout << it->get_job_id();//job id
+         cout <<"[" << it->get_job_id()<<"]";//job id
          cout << it->get_command()<< " : ";// command :
          cout << it->get_pid();//pid
-         cout << it->get_time();//seconds elapsed 
+         cout << it->get_time() << " secs";//seconds elapsed 
          if (it->get_is_stopped()){
             cout << "(stopped)";}// stopped (only is stopped)
 		cout << endl;
