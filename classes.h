@@ -52,7 +52,7 @@ public:
     //method functions
     void insert_job(job new_job);
     void print_jobs();
-    int remove_job(int job_id); // returnד 0 by success and -1 if object was not found
+    int remove_job(int job_id); // return 0 by success and -1 if object was not found
     int get_pid_by_job_id(int job_id) // get job id and return pid, return -1 if failed
 
    };

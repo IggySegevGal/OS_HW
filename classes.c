@@ -10,10 +10,10 @@
 	//constructors
 	job::job() {
 		this->pid = getpid();
-    this->job_id = 0;
+    	this->job_id = 0;
 		this->command = string("/0");
 		this->entry_time = time(NULL);
-		this->is_stopped = FALSE;
+		this->is_stopped = false;
 	}
 
 	job::job(int pid,int job_id,string command,time_t entry_time,bool is_stopped) {
@@ -51,15 +51,10 @@
   
   // ---------------------- jobs_class functions: -----------------------------------
 	jobs_class::jobs_class() {
-	this->jobs_list=NULL;
 	}
 
 	jobs_class::jobs_class(vector<job> jobs_vector) {
-		this->pid = pid;
-    	this->job_id = job_id;
-		this->command = command;
-		this->entry_time = entry_time;
-		this->is_stopped = is_stopped;
+		this->jobs_vector = jobs_vector
 	}
 
 	jobs_class::~jobs_class() {}
@@ -69,7 +64,7 @@
 	// insert a new job to class - insert from the back of the vector to maintain job_id order
 	void jobs_class::insert_job(job new_job) {
       jobs_vector.push_back(new_job); // insert new job to the end of the list
-      job_num = jobs_vector.size(); // update list size
+      //job_num = jobs_vector.size(); // update list size
     return;
 	}
 
@@ -79,12 +74,12 @@
       for (it = jobs_list.begin() ; it != jobs_list.end(); ++it){
          //print:
          cout << it->get_job_id();//job id
-         cout << it->get_command()<< ":";// command :
+         cout << it->get_command()<< " : ";// command :
          cout << it->get_pid();//pid
          cout << it->get_time();//seconds elapsed 
-         if (get_is_stopped()){
-            cout << "stopped";}// stopped (only is stopped)
-		cout<<<<endl;
+         if (it->get_is_stopped()){
+            cout << "(stopped)";}// stopped (only is stopped)
+		cout << endl;
       };
   };
 
