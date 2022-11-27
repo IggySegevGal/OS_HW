@@ -40,8 +40,8 @@ public:
 class jobs_class { 
 private:
    vector<job> jobs_vector;
-    //int job_num;
-   //int max_job_id;
+   int num_jobs;
+   int max_job_id;
 public:  
    // constructors
    jobs_class();
@@ -51,13 +51,15 @@ public:
     ~jobs_class();
 
     // getters:
-
+   int get_num_jobs();
+   int get_max_job_id();
+   
     //method functions
     void insert_job(job new_job);
     void print_jobs();
     int remove_job(int job_id); // return 0 by success and -1 if object was not found
     int get_pid_by_job_id(int job_id); // get job id and return pid, return -1 if failed
-
+    string get_cmd_by_job_id(int job_id); // get job id and return job command, return -1 if failed
    };
    
 

@@ -139,7 +139,51 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "fg"))
 	{
-   		
+		int curr_job_id = 0;
+		//invalid arguments
+		if (num_arg == 0) {
+			//check if list empry
+			if(jobs.get_num_jobs() == 0 ){
+				cout << "smash error: fg: jobs list is empty" << endl;
+				return 1;
+			}
+			else{
+				curr_job_id = jobs.get_max_job_id();
+			}
+		}
+		//assumming arg[1] is int
+		else if(num_arg == 1){ 
+			 curr_job_id = stoi(args[1]);
+			if(jobs.get_pid_by_job_id(curr_job_id) == -1 ){
+				cout << "smash error: fg: job-id <job-id> does not exist" << endl;
+				return 1;
+
+			}
+		}
+
+		else {
+			cout << "smash error: fg: invalid arguments" << endl;
+			return 1;
+		}
+
+		//everything is ok :)))))))))))
+		int curr_pid = jobs.get_pid_by_job_id(curr_job_id);
+		string curr_job_cmd = jobs.get_cmd_by_job_id(curr_job_id);
+		//print the cmd line and pid
+		cout << curr_job_cmd << " : " << curr_pid << endl;
+		//sending SIGCONT to current pid
+		if(kill(curr_pid, SIGCONT) == -1) {
+			perror("smash error: kill failed");
+			return 1;
+		}
+		// TBD remove_job();
+		// wai
+		if(waitpid(curr_pid,NULL,0) != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
+			perror("smash error: waitpid failed");
+			return 1;
+		}
+		
+
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
@@ -162,11 +206,12 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
  		ExeExternal(args, cmdString);
 	 	return 0;
 	}
-	//if (illegal_cmd == TRUE)
-	//{
+	if (illegal_cmd == TRUE)
+	{
+		// MAYBE USE IF COMMAND NOT FOUND
 		//printf("smash error: > \"%s\"\n", cmdString);
 		//return 1;
-	//}
+	}
     return 0;
 }
 //**************************************************************************************
