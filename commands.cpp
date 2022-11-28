@@ -132,6 +132,14 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 					perror("smash error: kill failed");
 					return 1;
 				}
+				else{//signal was send, update job status
+					if (stoi(input_signal) == 19 || stoi(input_signal) == 20){ //job stopped
+						jobs.set_status_by_job_id(job_id,"stopped");
+					}
+					else if (stoi(input_signal) == 18){ // SIGCONT without wait is background
+						jobs.set_status_by_job_id(job_id,"background");
+					}
+				}
 			return 0;
 			}
 		}
@@ -177,14 +185,23 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 			return 1;
 		}
 		// TBD remove_job();
-		// add something to handle ctrl z,c ? 
-		if(waitpid(curr_pid,NULL,0) != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
+		int status;
+		// add something to handle ctrl z,c 
+		int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
+		if(waitpid(curr_pid, &status, WUNTRACED) != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
 			perror("smash error: waitpid failed");
 			return 1;
 		}
+		if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
+			jobs.set_status_by_job_id(job_id,"stopped");
+			return 0;
+		}
+		if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
+			jobs.remove_job(job_id);
+			return 0;
+		}
 		// if ctrl z,c return job to list (ask lior where to put)
-		
-
+		return 0;
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 

@@ -51,6 +51,11 @@ using namespace std;
 		return job_status;
 	}
 
+	//setters
+    void job::set_job_status(string job_status){
+		this->job_status = job_status;
+	}
+
   
   // ---------------------- jobs_class functions: -----------------------------------
 	jobs_class::jobs_class() {
@@ -154,4 +159,15 @@ using namespace std;
           }
       }
 	return cmd;
+   }
+
+	// get job id and change status
+   void jobs_class::set_status_by_job_id(int job_id,string job_status) {
+    vector<job>::iterator it;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() == job_id){
+			it->set_job_status(job_status);
+          }
+      }
+	return;
    }

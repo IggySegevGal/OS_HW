@@ -35,6 +35,9 @@ public:
     int get_time();
     string get_job_status();
 
+    // setters
+    void set_job_status(string job_status);
+
 };
 
 class jobs_class { 
