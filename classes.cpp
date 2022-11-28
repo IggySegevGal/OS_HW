@@ -182,3 +182,15 @@ using namespace std;
       }
 	return job_id;
    }
+
+   	// get job id and return job status, return -1 if failed 
+    string jobs_class::get_job_status_by_job_id(int job_id) {
+    vector<job>::iterator it;
+	string status = "-1";
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() == job_id){
+			status = it->get_job_status();
+          }
+      }
+	return status;
+   }

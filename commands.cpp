@@ -208,7 +208,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	{
 		//input check
 		int curr_job_id = 0;
-		int max_stopped_job_id = job.get_max_stopped_id();
+		int max_stopped_job_id = jobs.get_max_stopped_id();
 		if (num_arg == 0) {// get max stopped job id
 			if (max_stopped_job_id == -1){ // no stopped jobs in list
 				perror("smash error: bg: there are no stopped jobs to resume");
@@ -230,6 +230,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 				cout << "smash error: bg: job-id " << curr_job_id << " is already running in the background" << endl;
 				return 1;
 			}
+		}	
 			// job exists and stopped
 		else { //invalid arguments
 			cout << "smash error: bg: invalid arguments" << endl;
