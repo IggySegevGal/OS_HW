@@ -8,22 +8,22 @@
 using namespace std;
 // ---------------------- job class functions: -----------------------------------
 	//constructors
-	job::job() {
+	job::job() { // TBD - Do WE NEED THIS CONSTRUCTOR ??!!! ****************************
 		// MAYBE USE FORK
 		this->pid = getpid();
     	this->job_id = 0;
 		this->command = string("/0");
 		this->entry_time = time(NULL);
-		this->is_stopped = false;
+		this->job_status = ""; // TBD!! 
 	}
 
-	job::job(int pid,int job_id,string command,time_t entry_time,bool is_stopped) {
+	job::job(int pid,int job_id,string command,time_t entry_time,string job_status) {
 		// MAYBE USE FORK
 		this->pid = pid;
     	this->job_id = job_id;
 		this->command = command;
 		this->entry_time = entry_time;
-		this->is_stopped = is_stopped;
+		this->job_status = job_status;
 	}
 	
 	//destructor
@@ -46,8 +46,8 @@ using namespace std;
 		return time(NULL)-entry_time;
 	}
 
-	bool job::get_is_stopped() {
-		return is_stopped;
+	string job::get_job_status() {
+		return job_status;
 	}
 
   
@@ -125,7 +125,7 @@ using namespace std;
          cout << it->get_command()<< " : ";// command :
          cout << it->get_pid();//pid
          cout << it->get_time() << " secs";//seconds elapsed 
-         if (it->get_is_stopped()){
+         if (strcmp(it->get_job_status(),"stopped") == 0){ // job is stopped
             cout << "(stopped)";}// stopped (only is stopped)
 		cout << endl;
       }

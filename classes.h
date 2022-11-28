@@ -19,11 +19,11 @@ private:
    int job_id;        
    string command;
    time_t entry_time;
-   bool is_stopped;
+   string job_status;
 public:  
    // constructors
    job();
-   job(int pid,int job_id,string command,time_t entry_time,bool is_stopped);
+   job(int pid,int job_id,string command,time_t entry_time,string job_status);
 
     // destructor
     ~job();
@@ -33,7 +33,7 @@ public:
     int get_job_id();
     string get_command();
     int get_time();
-    bool get_is_stopped();
+    string get_job_status();
 
 };
 

@@ -177,11 +177,12 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 			return 1;
 		}
 		// TBD remove_job();
-		// wai
+		// add something to handle ctrl z,c ? 
 		if(waitpid(curr_pid,NULL,0) != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
 			perror("smash error: waitpid failed");
 			return 1;
 		}
+		// if ctrl z,c return job to list (ask lior where to put)
 		
 
 	} 
