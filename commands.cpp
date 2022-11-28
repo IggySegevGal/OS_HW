@@ -193,11 +193,11 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 			return 1;
 		}
 		if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
-			jobs.set_status_by_job_id(job_id,"stopped");
+			jobs.set_status_by_job_id(curr_job_id,"stopped");
 			return 0;
 		}
 		if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
-			jobs.remove_job(job_id);
+			jobs.remove_job(curr_job_id);
 			return 0;
 		}
 		// if ctrl z,c return job to list (ask lior where to put)
