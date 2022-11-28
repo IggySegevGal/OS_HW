@@ -3,7 +3,7 @@
 #include "commands.h"
 #define MAX_PATH 4096
 using namespace std;
-string prev_path = "no_prev";
+extern string prev_path;
 //********************************************
 // function name: ExeCmd
 // Description: interperts and executes built-in commands
@@ -207,7 +207,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
  		ExeExternal(args, cmdString);
 	 	return 0;
 	}
-	if (illegal_cmd == TRUE)
+	if (illegal_cmd == true)
 	{
 		// MAYBE USE IF COMMAND NOT FOUND
 		//printf("smash error: > \"%s\"\n", cmdString);

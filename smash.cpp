@@ -19,6 +19,7 @@ using namespace std;
 char* L_Fg_Cmd; //cpp? 
 jobs_class jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE]; 
+string prev_path = "no_prev";
 //**************************************************************************************
 // function name: main
 // Description: main function of smash. get command from user and calls command functions
@@ -59,9 +60,9 @@ int main(int argc, char *argv[])
 		// here we copy the cmd from user to local mains parameter called cndstring
 		cmdString[strlen(lineSize)-1]='\0';
 					// perform a complicated Command
-		if(!ExeComp(lineSize)) continue; 
+		//if(!ExeComp(lineSize)) continue; 
 					// background command	
-	 	if(!BgCmd(lineSize, jobs)) continue; 
+	 	//if(!BgCmd(lineSize, jobs)) continue; 
 					// built in commands
 		ExeCmd(jobs, lineSize, cmdString);
 		

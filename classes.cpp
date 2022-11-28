@@ -5,6 +5,7 @@
 /*******************************************/
 /* define job and jobs classes*/
 #include "classes.h"
+#include "commands.h"
 using namespace std;
 // ---------------------- job class functions: -----------------------------------
 	//constructors
@@ -88,7 +89,7 @@ using namespace std;
 			vector<job>::iterator it;
 			for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
 				if(new_job.get_job_id() < it->get_job_id()){
-					vec.insert(it,new_job);
+					jobs_vector.insert(it,new_job);
 					break;
 				}
 			
@@ -109,7 +110,7 @@ using namespace std;
 			num_jobs = jobs_vector.size(); // update list size
 			if(job_id == max_job_id){ //removing max job id
 				vector<job>::iterator last_job = jobs_vector.end();
-				max_job_id = last_job.get_job_id();
+				max_job_id = last_job->get_job_id();
 			 }
           }
       }
@@ -125,7 +126,7 @@ using namespace std;
          cout << it->get_command()<< " : ";// command :
          cout << it->get_pid();//pid
          cout << it->get_time() << " secs";//seconds elapsed 
-         if (strcmp(it->get_job_status(),"stopped") == 0){ // job is stopped
+         if (strcmp(it->get_job_status().c_str(),"stopped") == 0){ // job is stopped
             cout << "(stopped)";}// stopped (only is stopped)
 		cout << endl;
       }
