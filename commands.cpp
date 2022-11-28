@@ -163,7 +163,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 		else if(num_arg == 1){ 
 			 curr_job_id = stoi(args[1]);
 			if(jobs.get_pid_by_job_id(curr_job_id) == -1 ){
-				cout << "smash error: fg: job-id <job-id> does not exist" << endl;
+				cout << "smash error: fg: job-id "<< curr_job_id << " does not exist" << endl;
 				return 1;
 
 			}
@@ -206,7 +206,51 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else if (!strcmp(cmd, "bg")) 
 	{
-  		
+		//input check
+		int curr_job_id = 0;
+		int max_stopped_job_id = job.get_max_stopped_id();
+		if (num_arg == 0) {// get max stopped job id
+			if (max_stopped_job_id == -1){ // no stopped jobs in list
+				perror("smash error: bg: there are no stopped jobs to resume");
+				return 1;
+			}
+			else{ // there is a stopped job in list
+				curr_job_id = max_stopped_job_id;
+			}
+
+		}
+		
+		else if(num_arg == 1){
+			curr_job_id = stoi(args[1]);
+			if (jobs.get_pid_by_job_id(curr_job_id) == -1 ){ // job id doesnt exist
+				cout << "smash error: bg: job-id " << curr_job_id << " does not exist" << endl;
+				return 1;
+			}
+			else if(strcmp(job.get_job_status(),"stopped") != 0){// job isnt stopped
+				cout << "smash error: bg: job-id " << curr_job_id << " is already running in the background" << endl;
+				return 1;
+			}
+			// job exists and stopped
+		else { //invalid arguments
+			cout << "smash error: bg: invalid arguments" << endl;
+			return 1;
+		}
+		// everything is ok :)))))
+		//move job to background:
+		curr_job_pid = jobs.get_pid_by_job_id(curr_job_id);
+		//sent SIGCONT to job
+		if (kill(curr_job_pid, SIGCONT) == 0){ // success
+			//print job 
+			cout << jobs.get_cmd_by_job_id(curr_job_id) << " : " << curr_job_pid << endl;
+			// return to running
+			jobs.set_status_by_job_id(curr_job_id,"background");
+		}
+		else { // kill failed
+			perror("smash error: kill failed");
+			return 1;
+		}
+
+		return 0;
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))

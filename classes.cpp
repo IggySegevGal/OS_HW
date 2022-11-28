@@ -171,3 +171,14 @@ using namespace std;
       }
 	return;
    }
+
+   int jobs_class::get_max_stopped_id(){ // return max stopped job id, return -1 if no stopped
+    vector<job>::iterator it;
+	int job_id = -1;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() > job_id && strcmp(it->get_job_status(),"stopped") == 0 ){
+			job_id = it->get_job_id();
+          }
+      }
+	return job_id;
+   }
