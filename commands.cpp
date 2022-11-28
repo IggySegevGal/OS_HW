@@ -226,7 +226,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 				cout << "smash error: bg: job-id " << curr_job_id << " does not exist" << endl;
 				return 1;
 			}
-			else if(strcmp(job.get_job_status(),"stopped") != 0){// job isnt stopped
+			else if(strcmp(jobs.get_job_status_by_job_id(curr_job_id).c_str(),"stopped") != 0){// job isnt stopped
 				cout << "smash error: bg: job-id " << curr_job_id << " is already running in the background" << endl;
 				return 1;
 			}
@@ -238,7 +238,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 		}
 		// everything is ok :)))))
 		//move job to background:
-		curr_job_pid = jobs.get_pid_by_job_id(curr_job_id);
+		int curr_job_pid = jobs.get_pid_by_job_id(curr_job_id);
 		//sent SIGCONT to job
 		if (kill(curr_job_pid, SIGCONT) == 0){ // success
 			//print job 
