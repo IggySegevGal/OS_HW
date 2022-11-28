@@ -1,7 +1,7 @@
 // classes.c
 // contains job & jobs_class classes
 // contains the functions that each method should have
-//
+
 /*******************************************/
 /* define job and jobs classes*/
 #include "classes.h"
