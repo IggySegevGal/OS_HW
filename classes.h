@@ -58,6 +58,7 @@ public:
    int get_max_job_id();
    
     //method functions
+    void remove_ended_jobs();
     void insert_job(job new_job);
     void print_jobs();
     int remove_job(int job_id); // return 0 by success and -1 if object was not found
@@ -66,6 +67,7 @@ public:
     void set_status_by_job_id(int job_id,string job_status);// get job id and change job status
     int get_max_stopped_id(); // return max stopped job id, return -1 if no stopped
     string get_job_status_by_job_id(int job_id);//get job id and return job status, return NULL if failed
+    
    };
    
 

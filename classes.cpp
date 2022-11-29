@@ -75,16 +75,19 @@ using namespace std;
   
     // getters:
    	int jobs_class::get_num_jobs(){
+		this->remove_ended_jobs();
 		return num_jobs;
 	}
    	
 	int jobs_class::get_max_job_id(){
+		this->remove_ended_jobs();
 		return max_job_id;
 	}
 
   	// class methods
 	// insert a new job to class - insert from the back of the vector to maintain job_id order
 	void jobs_class::insert_job(job new_job) {
+		this->remove_ended_jobs();
       //jobs_vector.push_back(new_job); // insert new job to the end of the list
 		if(max_job_id < new_job.get_job_id()){
 			jobs_vector.push_back(new_job);
@@ -107,6 +110,7 @@ using namespace std;
 	// remove a job from jobs_class
    int jobs_class::remove_job(int job_id){ // return 0 by success and -1 if object was not found
       vector<job>::iterator it;
+	  this->remove_ended_jobs();
       int job_removed = -1;
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
           if (it->get_job_id() == job_id){
@@ -125,6 +129,7 @@ using namespace std;
 	//print method - print all jobs in class
   void jobs_class::print_jobs(){
       std::vector<job>::iterator it;
+	  this->remove_ended_jobs();
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
          //print:
          cout <<"[" << it->get_job_id()<<"]";//job id
@@ -174,6 +179,7 @@ using namespace std;
 
    int jobs_class::get_max_stopped_id(){ // return max stopped job id, return -1 if no stopped
     vector<job>::iterator it;
+	this->remove_ended_jobs();
 	int job_id = -1;
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
           if (it->get_job_id() > job_id && strcmp(it->get_job_status().c_str(),"stopped") == 0 ){
@@ -193,4 +199,20 @@ using namespace std;
           }
       }
 	return status;
+   }
+
+   	// remove ended jobs from jobs_class
+    void jobs_class::remove_ended_jobs() { ///// ********************** when finished writing add to header
+		vector<job>::iterator it;
+		for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+			int st = waitpid(it->get_pid(), NULL, WNOHANG);
+			if(st == -1) { // there is no child process present at all - error
+				perror("smash error: waitpid failed");
+				jobs.remove_job(it->get_job_id());
+			}
+			if (st > 0){ // job has exited in the past, but the return value was not yet collected (a so-called zombie process)
+				jobs.remove_job(it->get_job_id());
+			}
+		}
+		return;
    }

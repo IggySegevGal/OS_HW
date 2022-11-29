@@ -184,7 +184,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 			perror("smash error: kill failed");
 			return 1;
 		}
-		// TBD remove_job();
+		
 		int status;
 		// add something to handle ctrl z,c 
 		int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
@@ -266,7 +266,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmdString);
+ 		ExeExternal(jobs,args, cmdString, num_arg);
 	 	return 0;
 	}
 	if (illegal_cmd == true)
@@ -283,20 +283,57 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString)
+void ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
 {
 	int pID;
     	switch(pID = fork()) 
 	{
-    		case -1:{}
+    		case -1:{ // fork failed
+				perror("smash error: fork failed");
+				return 1;
+			}
 			
-        	case 0:{
-			setpgrp();// Child Process		
-		}
+        	case 0:{// Child Process
+				setpgrp();	//change group ID
+				execv(args[0], args);// execute the needed process
+				perror("smash error: execv failed"); // Handle execv error if you got to this line
+				exit(1);	
+			}
 
-		default:{}
+			default:{ // father proccess - check if background or forground command
+				if (strcmp(args[num_arg],"&") == 0) {//if last arg is & - the proccess should run in background
+					//create new job
+					job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"background");
+					//insert job to jobs list
+					jobs.insert_job(new_job);
+					// the proccess is running in the child code
+					return 0;
+				}
+				else { // the process should run in forground
+					int status;
+					// add something to handle ctrl z,c 
+					int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
+					if(waitpid(pID, &status, WUNTRACED) != curr_pid) { 
+						perror("smash error: waitpid failed");
+						return 1;
+					}
+					if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
+						//create new job
+						job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"stopped");
+						//insert job to jobs list
+						jobs.insert_job(new_job);
+						return 0;
+					}
+					if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
+						//terminated before entering jobs class - do nothing
+						return 0;
+					}
+				}
+
+			}
 
 	}
+	return 0;
 	
 }
 //**************************************************************************************
