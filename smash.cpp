@@ -17,16 +17,28 @@ main file. This file contains the main function of smash
 using namespace std;
 
 char* L_Fg_Cmd; //cpp? 
-jobs_class jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
+jobs_class jobs; //This represents the list of jobs
 char lineSize[MAX_LINE_SIZE]; 
 string prev_path = "no_prev";
+int foreground_pid = -1; // the pid of the proccess running in Foreground - if none -> -1
 //**************************************************************************************
 // function name: main
 // Description: main function of smash. get command from user and calls command functions
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
-    char cmdString[MAX_LINE_SIZE]; 	   
+    char cmdString[MAX_LINE_SIZE]; 	 
+
+	// change signal handler table
+	/* set the INT (Ctrl-C) signal handler to 'catch_int' */
+	struct sigaction act;
+	act.sa_handler = &ctrl_c;
+	sigaction(SIGINT, &act, NULL);  
+
+	/* set the INT (Ctrl-Z) signal handler to 'catch_int' */
+	struct sigaction act;
+	act.sa_handler = &ctrl_z;
+	sigaction(SIGTSTP, &act, NULL);  
 
 	
 	//signal declaretions
@@ -64,7 +76,7 @@ int main(int argc, char *argv[])
 					// background command	
 	 	//if(!BgCmd(lineSize, jobs)) continue; 
 					// built in commands
-		ExeCmd(jobs, lineSize, cmdString);
+		ExeCmd(jobs, lineSize, cmdString, foreground_pid);
 		
 		/* initialize for next line read*/
 		lineSize[0]='\0';

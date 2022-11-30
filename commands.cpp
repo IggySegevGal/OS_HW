@@ -10,7 +10,7 @@ extern string prev_path;
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
+int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pid)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -184,7 +184,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
 			perror("smash error: kill failed");
 			return 1;
 		}
-		
+		foreground_pid = curr_pid;
 		int status;
 		// add something to handle ctrl z,c 
 		int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
@@ -194,13 +194,15 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
 		}
 		if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
 			jobs.set_status_by_job_id(curr_job_id,"stopped");
+			foreground_pid = -1;
 			return 0;
 		}
 		if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
 			jobs.remove_job(curr_job_id);
+			foreground_pid = -1;
 			return 0;
 		}
-		// if ctrl z,c return job to list (ask lior where to put)
+		
 		return 0;
 	} 
 	/*************************************************/
@@ -266,7 +268,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(jobs,args, cmdString, num_arg);
+ 		ExeExternal(jobs,args, cmdString, num_arg,foreground_pid);
 	 	return 0;
 	}
 	if (illegal_cmd == true)
@@ -283,7 +285,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
+int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg, int &foreground_pid)
 {
 	int pID;
     	switch(pID = fork()) 
@@ -309,7 +311,7 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 					// the proccess is running in the child code
 					return 0;
 				}
-				else { // the process should run in forground
+				else { // the process should run in foreground
 					int status;
 					// add something to handle ctrl z,c 
 					int waitpid_return_value = waitpid(pID, &status, WUNTRACED);
@@ -317,15 +319,18 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 						perror("smash error: waitpid failed");
 						return 1;
 					}
+					foreground_pid = pID;
 					if (waitpid_return_value == pID && WIFSTOPPED(status)){ // child was stopped
 						//create new job
 						job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"stopped");
 						//insert job to jobs list
 						jobs.insert_job(new_job);
+						foreground_pid = -1;
 						return 0;
 					}
 					if (waitpid_return_value == pID && WIFEXITED(status)){ // child terminated
 						//terminated before entering jobs class - do nothing
+						foreground_pid = -1;
 						return 0;
 					}
 				}

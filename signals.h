@@ -9,6 +9,8 @@
 #include <signal.h>
 using namespace std;
 
+void ctrl_c(int sig_num, int fg_pid);
+void ctrl_z(int sig_num, int fg_pid);
 
 #endif
 

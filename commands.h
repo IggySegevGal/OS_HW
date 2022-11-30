@@ -15,7 +15,7 @@ using namespace std;
 //typedef enum { FALSE , TRUE } bool; replace with true false
 int ExeComp(char* lineSize);
 int BgCmd(char* lineSize, jobs_class jobs);
-int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString);
-int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg);
+int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pid);
+int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg, int &foreground_pid);
 #endif
 
