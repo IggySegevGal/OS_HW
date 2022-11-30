@@ -188,7 +188,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 		int status;
 		// add something to handle ctrl z,c 
 		int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
-		if(waitpid(curr_pid, &status, WUNTRACED) != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
+		if(waitpid_return_value != curr_pid) { // TBD ********************** maybe not NULL to handle STOP from keyboard
 			perror("smash error: waitpid failed");
 			return 1;
 		}
@@ -283,7 +283,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
+int ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
 {
 	int pID;
     	switch(pID = fork()) 
@@ -312,19 +312,19 @@ void ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_a
 				else { // the process should run in forground
 					int status;
 					// add something to handle ctrl z,c 
-					int waitpid_return_value = waitpid(curr_pid, &status, WUNTRACED);
-					if(waitpid(pID, &status, WUNTRACED) != curr_pid) { 
+					int waitpid_return_value = waitpid(pID, &status, WUNTRACED);
+					if(waitpid_return_value != pID) { 
 						perror("smash error: waitpid failed");
 						return 1;
 					}
-					if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
+					if (waitpid_return_value == pID && WIFSTOPPED(status)){ // child was stopped
 						//create new job
 						job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"stopped");
 						//insert job to jobs list
 						jobs.insert_job(new_job);
 						return 0;
 					}
-					if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
+					if (waitpid_return_value == pID && WIFEXITED(status)){ // child terminated
 						//terminated before entering jobs class - do nothing
 						return 0;
 					}

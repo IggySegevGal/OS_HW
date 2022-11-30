@@ -208,10 +208,10 @@ using namespace std;
 			int st = waitpid(it->get_pid(), NULL, WNOHANG);
 			if(st == -1) { // there is no child process present at all - error
 				perror("smash error: waitpid failed");
-				jobs.remove_job(it->get_job_id());
+				remove_job(it->get_job_id());
 			}
 			if (st > 0){ // job has exited in the past, but the return value was not yet collected (a so-called zombie process)
-				jobs.remove_job(it->get_job_id());
+				remove_job(it->get_job_id());
 			}
 		}
 		return;

@@ -16,6 +16,6 @@ using namespace std;
 int ExeComp(char* lineSize);
 int BgCmd(char* lineSize, jobs_class jobs);
 int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString);
-void ExeExternal(char *args[MAX_ARG], char* cmdString);
+int ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_arg);
 #endif
 
