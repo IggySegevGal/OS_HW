@@ -132,9 +132,9 @@ using namespace std;
 	  this->remove_ended_jobs();
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
          //print:
-         cout <<"[" << it->get_job_id()<<"]";//job id
+         cout <<"[" << it->get_job_id()<<"] ";//job id
          cout << it->get_command()<< " : ";// command :
-         cout << it->get_pid();//pid
+         cout << it->get_pid() << " ";//pid
          cout << it->get_time() << " secs";//seconds elapsed 
          if (strcmp(it->get_job_status().c_str(),"stopped") == 0){ // job is stopped
             cout << "(stopped)";}// stopped (only is stopped)

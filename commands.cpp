@@ -10,7 +10,7 @@ extern string prev_path;
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
+int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString)
 {
 	char* cmd; 
 	char* args[MAX_ARG];
@@ -283,7 +283,7 @@ int ExeCmd(jobs_class jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-int ExeExternal(jobs_class jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
+int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg)
 {
 	int pID;
     	switch(pID = fork()) 
