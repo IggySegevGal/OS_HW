@@ -254,10 +254,11 @@ using namespace std;
 				int curr_pid;
 				int curr_id;
 				string curr_cmd;
-		  		for (int i=0 ; i < num_jobs; i++){
-					curr_pid = jobs_vector[i].get_pid();
-					curr_id = jobs_vector[i].get_job_id();
-					curr_cmd = jobs_vector[i].get_command();
+				jobs_class list_copy = *this;
+		  		for (int i=0 ; i < list_copy.num_jobs; i++){
+					curr_pid = list_copy.jobs_vector[i].get_pid();
+					curr_id = list_copy.jobs_vector[i].get_job_id();
+					curr_cmd = list_copy.jobs_vector[i].get_command();
 					
 					// -------------------------------------------------------------------
 					// send SIGTERM
