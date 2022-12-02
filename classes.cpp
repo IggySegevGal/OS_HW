@@ -132,7 +132,7 @@ using namespace std;
 	//print method - print all jobs in class
   void jobs_class::print_jobs(){
       std::vector<job>::iterator it;
-	  this->remove_ended_jobs(); //causing a bug -- why ?!!??!??!
+	  this->remove_ended_jobs(); 
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
          //print:
          cout <<"[" << it->get_job_id()<<"] ";//job id
@@ -234,13 +234,11 @@ using namespace std;
 
    	// remove ended jobs from jobs_class
     void jobs_class::remove_ended_jobs() { ///// ********************** when finished writing add to header
-		vector<job>::iterator it;
 		for (int i=0 ; i < num_jobs; i++){
 			int st = waitpid(jobs_vector[i].get_pid(), NULL, WNOHANG);
 			if(st == -1) { // there is no child process present at all - error
-				perror("smash error: waitpid555 failed");
+				perror("smash error: waitpid failed");
 				if(job_exists(jobs_vector[i].get_pid())){remove_job(jobs_vector[i].get_job_id());}				
-				cout << "im in remove_ended_jobs = wait return value = -1" << endl;
 			}
 			if (st > 0){ // job has exited in the past, but the return value was not yet collected (a so-called zombie process)
 				if(job_exists(jobs_vector[i].get_pid())){remove_job(jobs_vector[i].get_job_id());}
@@ -248,3 +246,68 @@ using namespace std;
 		}
 		return;
    }
+
+
+    void jobs_class::kill_all_jobs(){ // kill all proccesses in jobs vector
+		this->remove_ended_jobs();
+		/////// ******************** free memory !!!
+				int curr_pid;
+				int curr_id;
+				string curr_cmd;
+		  		for (int i=0 ; i < num_jobs; i++){
+					curr_pid = jobs_vector[i].get_pid();
+					curr_id = jobs_vector[i].get_job_id();
+					curr_cmd = jobs_vector[i].get_command();
+					
+					// -------------------------------------------------------------------
+					// send SIGTERM
+					cout <<"["<<curr_id <<"] " << curr_cmd <<" - Sending SIGTERM..." << flush;
+					if(kill(curr_pid, SIGTERM) == -1) {
+						perror("smash error: kill failed");
+						return;
+					}
+					
+					// wait 5 secs to see if SIGTERM succeeded
+					sleep(5);
+					
+					// check if SIGTERM succeeded (proccess terminated)
+					int status;
+					int waitpid_return_value = waitpid(curr_pid, &status, WNOHANG);
+					if (waitpid_return_value == -1) { // waitpid() failed
+						perror("smash error: waitpid failed");
+						return;
+					}
+					
+					if (WIFEXITED(status) || WIFSIGNALED(status)) { // job terminated
+						cout << "Done." << endl;
+						remove_job(curr_id);
+						continue;
+					}
+					// -----------------------------------------------------------
+					// kill proccess if not yet ended
+					cout << "(5 sec passed) Sending SIGKILL..." << flush;
+
+					// send SIGKILL
+					if(kill(curr_pid, SIGKILL) == -1) {
+						perror("smash error: kill failed");
+						return;
+					}
+					
+					// check if SIGKILL succeeded (proccess terminated)
+					int status2;
+					waitpid_return_value = waitpid(curr_pid, &status2, WNOHANG);
+					if (waitpid_return_value == -1) { // waitpid() failed
+						perror("smash error: waitpid failed");
+						return;
+					}
+					
+					if (WIFEXITED(status) || WIFSIGNALED(status)) { // job terminated
+						cout << "Done." << endl;
+						remove_job(curr_id);
+						continue;
+					}
+					
+				}
+		return;
+
+	}

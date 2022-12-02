@@ -4,6 +4,7 @@
 #define MAX_PATH 4096
 using namespace std;
 extern string prev_path;
+extern char* L_Fg_Cmd;
 //********************************************
 // function name: ExeCmd
 // Description: interperts and executes built-in commands
@@ -267,7 +268,17 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
+		// check if kill routine needed: (if needed, handle inside if)
+		if(num_arg > 0){ // quit and maybe also kill
+			if(strcmp(args[1], "kill")){//if second argument is kill
+			// handle kill:
+				jobs.kill_all_jobs();
+			}
+		}
+		// free memory
+		free(L_Fg_Cmd);
+		// handle quit smash:
+		exit(0);
 	} 
 	/*************************************************/
 	else if (!strcmp(cmd, "diff"))
@@ -318,15 +329,12 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 					//insert job to jobs list
 					jobs.insert_job(new_job);
 					// the proccess is running in the child code
-cout << "got here" << endl;					
-return 0;
+					cout << "got here" << endl;					
+					return 0;
 				}
 				else { // the process should run in foreground
-					int status;
-					// add something to handle ctrl z,c 
-					
-					// remove me!!!!!!!!!!!!!!!!111
-					cout << "started waiting for fg proccess" << endl;
+					int status;					
+
 					foreground_pid = pID;
 					int waitpid_return_value = waitpid(pID, &status, WUNTRACED);
 					if(waitpid_return_value != pID) { 
@@ -340,15 +348,13 @@ return 0;
 						//insert job to jobs list
 						jobs.insert_job(new_job);
 						foreground_pid = -1;
-					// remove me!!!!!!!!!!!!!!!!111
-					cout << "stopped waiting for fg proccess cus child was stopped" << endl;
+
 						return 0;
 					}
 					if (waitpid_return_value == pID && WIFEXITED(status)){ // child terminated
 						//terminated before entering jobs class - do nothing
 						foreground_pid = -1;
-					// remove me!!!!!!!!!!!!!!!!111
-					cout << "stopped waiting for fg proccess cus child terminated" << endl;
+
 						return 0;
 					}
 				}
