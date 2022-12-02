@@ -270,7 +270,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 	{
 		// check if kill routine needed: (if needed, handle inside if)
 		if(num_arg > 0){ // quit and maybe also kill
-			if(strcmp(args[1], "kill")){//if second argument is kill
+			if(strcmp(args[1], "kill") == 0){//if second argument is kill
 			// handle kill:
 				jobs.kill_all_jobs();
 			}
