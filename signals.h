@@ -7,10 +7,11 @@
 #include <stdlib.h>
 #include <string>
 #include <signal.h>
+#include "classes.h" 
 using namespace std;
 
-void ctrl_c(int sig_num, int fg_pid);
-void ctrl_z(int sig_num, int fg_pid);
+void ctrl_c(int sig_num);
+void ctrl_z(int sig_num);
 
 #endif
 

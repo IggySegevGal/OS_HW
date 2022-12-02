@@ -32,6 +32,8 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			num_arg++; 
  
 	}
+	// remove ended jobs
+	jobs.remove_ended_jobs();
 
 /*************************************************/
 // Built in Commands PLEASE NOTE NOT ALL REQUIRED
@@ -132,7 +134,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 					perror("smash error: kill failed");
 					return 1;
 				}
-				else{//signal was send, update job status
+				else{//signal was send, update job status ************************************************* handle other signals!!!! like SIGSTOP and SIGCONT
 					if (stoi(input_signal) == 19 || stoi(input_signal) == 20){ //job stopped
 						jobs.set_status_by_job_id(job_id,"stopped");
 					}
@@ -157,6 +159,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			}
 			else{
 				curr_job_id = jobs.get_max_job_id();
+				cout << "in fg function - max_job_id is " << curr_job_id << endl;
 			}
 		}
 		//assumming arg[1] is int
@@ -197,8 +200,14 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			foreground_pid = -1;
 			return 0;
 		}
-		if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated
-			jobs.remove_job(curr_job_id);
+		//if(waitpid_return_value == curr_pid && WTERMSIG(status) == SIGKILL){ // child was killed and handeld
+		//foreground_pid = -1;
+		//	return 0;
+		//}
+		if (waitpid_return_value == curr_pid && WIFEXITED(status)){ // child terminated -- what about child killed by ctrl - c ?? is it zombie ?!
+			   if (jobs.job_exists(curr_pid)) {
+     				 jobs.remove_job(curr_job_id);
+			    }			
 			foreground_pid = -1;
 			return 0;
 		}
@@ -288,7 +297,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg, int &foreground_pid)
 {
 	int pID;
-    	switch(pID = fork()) 
+    	switch(pID = fork()) // we have a bug!!!! if child execv fails, father keeps going without knowing
 	{
     		case -1:{ // fork failed
 				perror("smash error: fork failed");
@@ -309,28 +318,37 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 					//insert job to jobs list
 					jobs.insert_job(new_job);
 					// the proccess is running in the child code
-					return 0;
+cout << "got here" << endl;					
+return 0;
 				}
 				else { // the process should run in foreground
 					int status;
 					// add something to handle ctrl z,c 
+					
+					// remove me!!!!!!!!!!!!!!!!111
+					cout << "started waiting for fg proccess" << endl;
+					foreground_pid = pID;
 					int waitpid_return_value = waitpid(pID, &status, WUNTRACED);
 					if(waitpid_return_value != pID) { 
 						perror("smash error: waitpid failed");
 						return 1;
 					}
-					foreground_pid = pID;
+					
 					if (waitpid_return_value == pID && WIFSTOPPED(status)){ // child was stopped
 						//create new job
 						job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"stopped");
 						//insert job to jobs list
 						jobs.insert_job(new_job);
 						foreground_pid = -1;
+					// remove me!!!!!!!!!!!!!!!!111
+					cout << "stopped waiting for fg proccess cus child was stopped" << endl;
 						return 0;
 					}
 					if (waitpid_return_value == pID && WIFEXITED(status)){ // child terminated
 						//terminated before entering jobs class - do nothing
 						foreground_pid = -1;
+					// remove me!!!!!!!!!!!!!!!!111
+					cout << "stopped waiting for fg proccess cus child terminated" << endl;
 						return 0;
 					}
 				}

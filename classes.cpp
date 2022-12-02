@@ -75,12 +75,10 @@ using namespace std;
   
     // getters:
    	int jobs_class::get_num_jobs(){
-		this->remove_ended_jobs();
 		return num_jobs;
 	}
    	
 	int jobs_class::get_max_job_id(){
-		this->remove_ended_jobs();
 		return max_job_id;
 	}
 
@@ -110,18 +108,23 @@ using namespace std;
 	// remove a job from jobs_class
    int jobs_class::remove_job(int job_id){ // return 0 by success and -1 if object was not found
       vector<job>::iterator it;
-	  this->remove_ended_jobs();
       int job_removed = -1;
-      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
-          if (it->get_job_id() == job_id){
-            jobs_vector.erase(it);
+      for (int i=0 ; i < num_jobs; i++){
+          if (jobs_vector[i].get_job_id() == job_id){
+            jobs_vector.erase(jobs_vector.begin()+i);
             job_removed = 0;
 			num_jobs = jobs_vector.size(); // update list size
-			if(job_id == max_job_id){ //removing max job id
-				vector<job>::iterator last_job = jobs_vector.end();
-				max_job_id = last_job->get_job_id();
+			if(job_id == max_job_id ){ //removing max job id
+				// remove meeee
+				cout << "num jobs is " << num_jobs <<endl;
+				if (num_jobs == 0) {max_job_id = 0;}
+				else {
+				max_job_id = jobs_vector.back().get_job_id();
+				}
 			 }
+	  return job_removed;
           }
+	
       }
       return job_removed;
    }
@@ -129,7 +132,7 @@ using namespace std;
 	//print method - print all jobs in class
   void jobs_class::print_jobs(){
       std::vector<job>::iterator it;
-	  this->remove_ended_jobs();
+	  this->remove_ended_jobs(); //causing a bug -- why ?!!??!??!
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
          //print:
          cout <<"[" << it->get_job_id()<<"] ";//job id
@@ -137,7 +140,7 @@ using namespace std;
          cout << it->get_pid() << " ";//pid
          cout << it->get_time() << " secs";//seconds elapsed 
          if (strcmp(it->get_job_status().c_str(),"stopped") == 0){ // job is stopped
-            cout << "(stopped)";}// stopped (only is stopped)
+            cout << " (stopped)";}// stopped (only is stopped)
 		cout << endl;
       }
   }
@@ -179,7 +182,6 @@ using namespace std;
 
    int jobs_class::get_max_stopped_id(){ // return max stopped job id, return -1 if no stopped
     vector<job>::iterator it;
-	this->remove_ended_jobs();
 	int job_id = -1;
       for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
           if (it->get_job_id() > job_id && strcmp(it->get_job_status().c_str(),"stopped") == 0 ){
@@ -201,17 +203,47 @@ using namespace std;
 	return status;
    }
 
+
+
+	// get job pid and return id, return -1 if failed 
+   int jobs_class::get_job_id_by_pid(int job_pid) {
+    vector<job>::iterator it;
+	int job_id = -1;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_pid() == job_pid){
+			job_id = it->get_job_id();
+          }
+      }
+	return job_id;
+   }
+
+
+
+	// get job pid and return id, return -1 if failed 
+   bool jobs_class::job_exists(int job_pid) {
+    vector<job>::iterator it;
+	bool exists = false;
+      for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_pid() == job_pid){
+			exists = true;
+          }
+      }
+	return exists;
+   }
+
+
    	// remove ended jobs from jobs_class
     void jobs_class::remove_ended_jobs() { ///// ********************** when finished writing add to header
 		vector<job>::iterator it;
-		for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
-			int st = waitpid(it->get_pid(), NULL, WNOHANG);
+		for (int i=0 ; i < num_jobs; i++){
+			int st = waitpid(jobs_vector[i].get_pid(), NULL, WNOHANG);
 			if(st == -1) { // there is no child process present at all - error
-				perror("smash error: waitpid failed");
-				remove_job(it->get_job_id());
+				perror("smash error: waitpid555 failed");
+				if(job_exists(jobs_vector[i].get_pid())){remove_job(jobs_vector[i].get_job_id());}				
+				cout << "im in remove_ended_jobs = wait return value = -1" << endl;
 			}
 			if (st > 0){ // job has exited in the past, but the return value was not yet collected (a so-called zombie process)
-				remove_job(it->get_job_id());
+				if(job_exists(jobs_vector[i].get_pid())){remove_job(jobs_vector[i].get_job_id());}
 			}
 		}
 		return;

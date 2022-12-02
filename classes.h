@@ -67,6 +67,8 @@ public:
     void set_status_by_job_id(int job_id,string job_status);// get job id and change job status
     int get_max_stopped_id(); // return max stopped job id, return -1 if no stopped
     string get_job_status_by_job_id(int job_id);//get job id and return job status, return NULL if failed
+    int get_job_id_by_pid(int job_pid); // get job pid and return id, return -1 if failed
+    bool job_exists(int job_pid); // get a boolian = true if job is in list, and false if not
     
    };
    

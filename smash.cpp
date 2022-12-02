@@ -31,14 +31,22 @@ int main(int argc, char *argv[])
 
 	// change signal handler table
 	/* set the INT (Ctrl-C) signal handler to 'catch_int' */
-	struct sigaction act;
-	act.sa_handler = &ctrl_c;
-	sigaction(SIGINT, &act, NULL);  
+	struct sigaction act1;
+	sigfillset(&act1.sa_mask);
+	act1.sa_flags = SA_RESTART;
+	act1.sa_handler = &ctrl_c;
+	if (sigaction(SIGINT, &act1, NULL) == -1) {//sigaction failed
+	perror("smash error: sigaction failed");
+	};  
 
 	/* set the INT (Ctrl-Z) signal handler to 'catch_int' */
-	struct sigaction act;
-	act.sa_handler = &ctrl_z;
-	sigaction(SIGTSTP, &act, NULL);  
+	struct sigaction act2;
+	sigfillset(&act2.sa_mask);
+	act2.sa_flags = SA_RESTART;
+	act2.sa_handler = &ctrl_z;
+	if (sigaction(SIGTSTP, &act2, NULL) == -1) {//sigaction failed
+	perror("smash error: sigaction failed");	
+	};  
 
 	
 	//signal declaretions
