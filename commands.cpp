@@ -298,7 +298,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 		f2.open(file2_path,ios::in);
 
 		// check if fopen succeeded
-    	if(f1==NULL || f2==NULL){
+    	if(!f1.is_open() || !f2.is_open()){
 			perror("smash error: fopen failed");
 			return 1;
 		}

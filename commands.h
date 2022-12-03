@@ -8,7 +8,10 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "classes.h" 
+#include "classes.h"
+#include<iostream>
+#include<fstream>
+
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
 using namespace std;
