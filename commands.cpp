@@ -283,7 +283,43 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 	/*************************************************/
 	else if (!strcmp(cmd, "diff"))
 	{
-   		
+   		if (num_arg != 2){//input check
+			cout << "smash error: diff: invalid arguments" << endl;
+			return 1;
+		}
+		int zero_if_equal = 0;
+		// save files paths
+		string file1_path = args[1];
+		string file2_path = args[2];
+
+		fstream f1,f2;
+		//open files
+		f1.open(file1_path,ios::in);
+		f2.open(file2_path,ios::in);
+
+		// check if fopen succeeded
+    	if(f1==NULL || f2==NULL){
+			perror("smash error: fopen failed");
+			return 1;
+		}
+        
+		char c1,c2;
+
+		while(1){
+			c1=f1.get();
+			c2=f2.get();
+			if(c1!=c2){
+				zero_if_equal=1;
+				break;
+			}
+			if((c1==EOF)||(c2==EOF))
+				break;
+		}
+		f1.close();
+		f2.close();
+		cout << zero_if_equal << endl;
+		return 0;
+
 	} 
 	/*************************************************/
 	else // external command
