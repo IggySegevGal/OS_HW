@@ -15,7 +15,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 {
 	char* cmd; 
 	char* args[MAX_ARG];
-	char pwd[MAX_LINE_SIZE];
+	
 	char const * delimiters = " \t\n";  
 	int i = 0, num_arg = 0;
 	char* curr_dir_pointer = get_current_dir_name();
@@ -404,28 +404,5 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 }
 //**************************************************************************************
 
-//**************************************************************************************
-// function name: BgCmd
-// Description: if command is in background, insert the command to jobs
-// Parameters: command string, pointer to jobs
-// Returns: 0- BG command -1- if not
-//**************************************************************************************
-int BgCmd(char* lineSize, void* jobs)
-{
 
-	char* Command;
-	char const * delimiters = " \t\n";
-	char *args[MAX_ARG];
-	if (lineSize[strlen(lineSize)-2] == '&')
-	{
-		lineSize[strlen(lineSize)-2] = '\0';
-		// Add your code here (execute a in the background)
-					
-		/* 
-		your code
-		*/
-		
-	}
-	return -1;
-}
 
