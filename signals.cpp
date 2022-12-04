@@ -17,8 +17,7 @@ void ctrl_c(int sig_num) {
     cout << "smash: caught ctrl-C" << endl;
     // check if there is any fg proccess running:
     if (foreground_pid == -1){
-	// remove the cout afterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr 	
-	cout << "no fg proccess running" << endl;
+
       return;
     }
     // send signal
@@ -34,7 +33,6 @@ void ctrl_c(int sig_num) {
 
    //print to screen:
    cout << "smash: process "<< foreground_pid<< " was killed" << endl;
-   cout << "job id is " << job_id << endl;
 foreground_pid = -1;
    return;
 
@@ -49,8 +47,7 @@ void ctrl_z(int sig_num) {
     cout << "smash: caught ctrl-Z" << endl;
     // check if there is any fg proccess running:
     if (foreground_pid == -1){
-	// remove the cout afterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr 	
-	cout << "no fg proccess running" << endl;      
+	    
 	return;
     }
     // send signal

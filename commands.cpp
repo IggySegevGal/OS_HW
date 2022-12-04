@@ -135,7 +135,8 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 					perror("smash error: kill failed");
 					return 1;
 				}
-				else{//signal was send, update job status ************************************************* handle other signals!!!! like SIGSTOP and SIGCONT
+				else{//signal was sent, update job status ************************************************* handle other signals!!!! like SIGSTOP and SIGCONT
+					cout << "signal number "<< input_signal << " was sent to pid "<< job_pid << endl;
 					if (stoi(input_signal) == 19 || stoi(input_signal) == 20){ //job stopped
 						jobs.set_status_by_job_id(job_id,"stopped");
 					}
@@ -365,7 +366,7 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 					//insert job to jobs list
 					jobs.insert_job(new_job);
 					// the proccess is running in the child code
-					cout << "got here" << endl;					
+										
 					return 0;
 				}
 				else { // the process should run in foreground

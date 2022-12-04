@@ -115,8 +115,7 @@ using namespace std;
             job_removed = 0;
 			num_jobs = jobs_vector.size(); // update list size
 			if(job_id == max_job_id ){ //removing max job id
-				// remove meeee
-				cout << "num jobs is " << num_jobs <<endl;
+				
 				if (num_jobs == 0) {max_job_id = 0;}
 				else {
 				max_job_id = jobs_vector.back().get_job_id();
