@@ -345,7 +345,12 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg, int &foreground_pid)
 {
 	int pID;
-    	switch(pID = fork()) // we have a bug!!!! if child execv fails, father keeps going without knowing
+	bool is_background = false;
+	if (strcmp(args[num_arg],"&") == 0) {
+		args[num_arg]=NULL;
+		is_background = true;
+	}
+    	switch(pID = fork()) 
 	{
     		case -1:{ // fork failed
 				perror("smash error: fork failed");
@@ -360,7 +365,7 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 			}
 
 			default:{ // father proccess - check if background or forground command
-				if (strcmp(args[num_arg],"&") == 0) {//if last arg is & - the proccess should run in background
+				if (is_background) {//if last arg is & - the proccess should run in background
 					//create new job
 					job new_job = job(pID, jobs.get_max_job_id()+1, cmdString, time(NULL),"background");
 					//insert job to jobs list
