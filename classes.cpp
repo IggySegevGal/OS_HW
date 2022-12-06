@@ -55,6 +55,11 @@ using namespace std;
     void job::set_job_status(string job_status){
 		this->job_status = job_status;
 	}
+	
+    void job::set_entry_time(time_t entry_time){
+		this->entry_time = entry_time;
+	}
+
 
   
   // ---------------------- jobs_class functions: -----------------------------------
@@ -178,6 +183,16 @@ using namespace std;
       }
 	return;
    }
+
+	void jobs_class::set_entry_time_by_id(int job_id,time_t entry_time){
+    	vector<job>::iterator it;
+      	for (it = jobs_vector.begin() ; it != jobs_vector.end(); ++it){
+          if (it->get_job_id() == job_id){
+			it->set_entry_time(entry_time);
+          }
+      	}
+	return;
+	}
 
    int jobs_class::get_max_stopped_id(){ // return max stopped job id, return -1 if no stopped
     vector<job>::iterator it;

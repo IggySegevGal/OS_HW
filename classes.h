@@ -37,7 +37,7 @@ public:
 
     // setters
     void set_job_status(string job_status);
-
+ void set_entry_time(time_t entry_time);
 };
 
 class jobs_class { 
@@ -70,6 +70,7 @@ public:
     int get_job_id_by_pid(int job_pid); // get job pid and return id, return -1 if failed
     bool job_exists(int job_pid); // get a boolian = true if job is in list, and false if not
     void kill_all_jobs(); // kill all proccesses in jobs vector
+void set_entry_time_by_id(int job_id,time_t entry_time); // set entry time by job id
    };
    
 

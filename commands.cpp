@@ -122,25 +122,34 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			return 1;
 		}
 		else {
-			string input_signal = args[1];
-			input_signal.erase(0,1); //remove '-'
-			int job_id = stoi(args[2]);
+			string input_signal_string = args[1];
+			input_signal_string.erase(0,1); //remove '-'
+			int input_signal;
+			int job_id;
+			try{
+				input_signal = stoi(input_signal_string);
+				job_id = stoi(args[2]);
+			}
+			catch(...){
+				cout << "smash error: kill: invalid arguments" << endl;
+				return 1;
+			}
 			int job_pid = jobs.get_pid_by_job_id(job_id);
 			if (job_pid == -1){ // id not found
 				cout << "smash error: kill: job-id " << job_id << " does not exist"<<endl;
 				return 1;
 			}
 			else { // everything is ok, send signal
-				if(kill(job_pid, stoi(input_signal)) == -1) {
+				if(kill(job_pid, input_signal) == -1) {
 					perror("smash error: kill failed");
 					return 1;
 				}
 				else{//signal was sent, update job status ************************************************* handle other signals!!!! like SIGSTOP and SIGCONT
 					cout << "signal number "<< input_signal << " was sent to pid "<< job_pid << endl;
-					if (stoi(input_signal) == 19 || stoi(input_signal) == 20){ //job stopped
+					if (input_signal == 19 || input_signal == 20){ //job stopped
 						jobs.set_status_by_job_id(job_id,"stopped");
 					}
-					else if (stoi(input_signal) == 18){ // SIGCONT without wait is background
+					else if (input_signal == 18){ // SIGCONT without wait is background
 						jobs.set_status_by_job_id(job_id,"background");
 					}
 				}
@@ -161,12 +170,17 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			}
 			else{
 				curr_job_id = jobs.get_max_job_id();
-				cout << "in fg function - max_job_id is " << curr_job_id << endl;
 			}
 		}
 		//assumming arg[1] is int
 		else if(num_arg == 1){ 
+			try {
 			 curr_job_id = stoi(args[1]);
+			}
+			catch(...){
+				cout << "smash error: fg: invalid arguments" << endl;
+				return 1;
+			}
 			if(jobs.get_pid_by_job_id(curr_job_id) == -1 ){
 				cout << "smash error: fg: job-id "<< curr_job_id << " does not exist" << endl;
 				return 1;
@@ -198,6 +212,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			return 1;
 		}
 		if (waitpid_return_value == curr_pid && WIFSTOPPED(status)){ // child was stopped
+			jobs.set_entry_time_by_id(curr_job_id,time(NULL));			
 			jobs.set_status_by_job_id(curr_job_id,"stopped");
 			foreground_pid = -1;
 			return 0;
