@@ -239,7 +239,7 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 		int max_stopped_job_id = jobs.get_max_stopped_id();
 		if (num_arg == 0) {// get max stopped job id
 			if (max_stopped_job_id == -1){ // no stopped jobs in list
-				perror("smash error: bg: there are no stopped jobs to resume");
+				cout << "smash error: bg: there are no stopped jobs to resume"<<endl;
 				return 1;
 			}
 			else{ // there is a stopped job in list
