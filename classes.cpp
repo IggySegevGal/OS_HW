@@ -293,7 +293,7 @@ using namespace std;
 						return;
 					}
 					
-					if (WIFEXITED(status) || WIFSIGNALED(status)) { // job terminated
+					if ((WIFEXITED(status) || WIFSIGNALED(status) )&& waitpid_return_value==curr_pid ) { // job terminated
 						cout << "Done." << endl;
 						remove_job(curr_id);
 						continue;
