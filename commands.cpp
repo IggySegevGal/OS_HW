@@ -249,7 +249,9 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 		}
 		
 		else if(num_arg == 1){
-			curr_job_id = stoi(args[1]);
+			try {curr_job_id = stoi(args[1]); }
+			catch(...){cout <<"smash error: bg: invalid arguments" << endl;
+			return 1;}
 			if (jobs.get_pid_by_job_id(curr_job_id) == -1 ){ // job id doesnt exist
 				cout << "smash error: bg: job-id " << curr_job_id << " does not exist" << endl;
 				return 1;
@@ -361,7 +363,7 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 {
 	int pID;
 	bool is_background = false;
-	if (strcmp(args[num_arg],"&") == 0) {
+	if ( num_arg > 0 && (strcmp(args[num_arg],"&") == 0)) {
 		args[num_arg]=NULL;
 		is_background = true;
 	}
@@ -424,5 +426,13 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 }
 //**************************************************************************************
 
-
-
+/*
+bool  is_not_int(char* input) { // return true if not int, return false if is int
+   char str[] = "3257fg";
+   for (int i = 0; i < strlen(input); i++) {
+      if(!isdigit(input[i])){// not digit
+	return true;
+      }
+   }
+   return false;
+}*/
