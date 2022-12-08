@@ -126,6 +126,10 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 			input_signal_string.erase(0,1); //remove '-'
 			int input_signal;
 			int job_id;
+			if(is_not_int(args[2])){ // first or sec arg is not int
+				cout << "smash error: kill: invalid arguments" << endl;
+				return 1;
+			}
 			try{
 				input_signal = stoi(input_signal_string);
 				job_id = stoi(args[2]);
@@ -174,6 +178,10 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 		}
 		//assumming arg[1] is int
 		else if(num_arg == 1){ 
+			if(is_not_int(args[1])){ // first arg is not int
+				cout << "smash error: fg: invalid arguments" << endl;
+				return 1;
+			}
 			try {
 			 curr_job_id = stoi(args[1]);
 			}
@@ -249,6 +257,10 @@ int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pi
 		}
 		
 		else if(num_arg == 1){
+			if(is_not_int(args[1])){ // first arg is not int
+				cout << "smash error: bg: invalid arguments" << endl;
+				return 1;
+			}
 			try {curr_job_id = stoi(args[1]); }
 			catch(...){cout <<"smash error: bg: invalid arguments" << endl;
 			return 1;}
@@ -426,13 +438,12 @@ int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_a
 }
 //**************************************************************************************
 
-/*
+
 bool  is_not_int(char* input) { // return true if not int, return false if is int
-   char str[] = "3257fg";
-   for (int i = 0; i < strlen(input); i++) {
+   for (int i = 0; i < (int)strlen(input); i++) {
       if(!isdigit(input[i])){// not digit
 	return true;
       }
    }
    return false;
-}*/
+}

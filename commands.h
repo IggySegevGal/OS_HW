@@ -19,5 +19,6 @@
 using namespace std;
 int ExeCmd(jobs_class &jobs, char* lineSize, char* cmdString, int &foreground_pid);
 int ExeExternal(jobs_class &jobs,char *args[MAX_ARG], char* cmdString, int num_arg, int &foreground_pid);
+bool is_not_int(char* input); // return true if not int, return false if is int
 #endif
 
