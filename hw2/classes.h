@@ -39,6 +39,7 @@ class accounts {
     vector<account> accounts_vector; // vector of account objects 
     int num_accounts;
     int max_account_id;
+    int bank_balance;
 
     public:
     // constructors

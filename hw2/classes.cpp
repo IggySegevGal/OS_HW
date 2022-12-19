@@ -38,8 +38,9 @@
 
 	//constructors
 	accounts::accounts() { 
-    int num_accounts = 0;
-    int max_account_id = 0;
+        num_accounts = 0;
+        max_account_id = 0;
+        bank_balance = 0;
 	}
 
     // destructor
@@ -52,7 +53,9 @@
    int accounts::get_max_account_id(){
         return max_account_id;
    }
-
+    int accounts::get_bank_balance(){
+        return bank_balance;
+   }
    // **************** method functions: **************************
    	
     // insert a new account to class - insert from the back of the vector to maintain account_id order
@@ -116,11 +119,22 @@
           }
       }
       return account_removed;
-
     }
 
     void print_accounts(){
-
+      //print first line:
+      cout << "Current Bank Status" << endl;
+      std::vector<account>::iterator it;
+      // print loop
+      for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+         //print:
+        cout << "Account " << it->get_account_id(); // account id
+        cout << ": Balance - " << it->get_balance() << " $, "; // balance
+        cout << "Account Password - " << it->get_password() << endl; // password
+      }
+      
+      //print first line:
+      cout << "The Bank has " << bank_balance << " $" << endl;
     }
 
 
