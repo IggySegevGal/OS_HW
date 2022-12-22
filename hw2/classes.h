@@ -26,6 +26,7 @@ class account {
     int get_account_id();
     int get_password();
     int get_balance();
+    
     //setters:
     void set_account_id(int new_account_id);
     void set_password(int new_password);
@@ -49,9 +50,9 @@ class accounts {
     ~accounts();
 
     // getters:
-   int get_num_accounts();
-   int get_max_account_id(); 
-
+    int get_num_accounts();
+    int get_max_account_id(); 
+    int get_bank_balance(); 
    //method functions:
     int insert_account(account new_account); // return 0 by success and -1 if account id already exists
     int remove_account(int account_id, int password); // return 0 by success (correct password) and -1 if object was not found
