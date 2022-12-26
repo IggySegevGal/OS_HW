@@ -50,7 +50,7 @@ gets a command line and thread data struct and executes command*/
     }
 
     /*choose command*/
-    if (!strcmp(letter, "O")){
+    if (!strcmp(letter.c_str(), "O")){
     /*open account: O <account> <password> <initial_amount> */
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -65,9 +65,8 @@ gets a command line and thread data struct and executes command*/
             return;
         }
         log_file << ATM_id<< ": New account id is "<< account_id << " with password " << password << " and initial balance "<< initial_amount<< endl;
-        break;
     }
-    else if (!strcmp(letter, "D")){
+    else if (!strcmp(letter.c_str(), "D")){
     /*deposite to account: D <account> <password> <amount> */
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -81,9 +80,9 @@ gets a command line and thread data struct and executes command*/
         else { // success
             log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
         }
-        break;
+       
     }
-    else if (!strcmp(letter, "W")){
+    else if (!strcmp(letter.c_str(), "W")){
     /*withdraw from account: W <account> <password> <amount>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -101,9 +100,9 @@ gets a command line and thread data struct and executes command*/
         else { // success
             log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was withdrew"<< endl;
         }
-        break;
+        
     }
-    else if (!strcmp(letter, "B")){
+    else if (!strcmp(letter.c_str(), "B")){
     /*get balance B <account> <password>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -117,9 +116,9 @@ gets a command line and thread data struct and executes command*/
         else { // success
             log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
         }
-        break;
+        
     }
-    else if (!strcmp(letter, "Q")){
+    else if (!strcmp(letter.c_str(), "Q")){
     /*remove account: Q <account> <password>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -133,10 +132,10 @@ gets a command line and thread data struct and executes command*/
         else { // success
             log_file << ATM_id<< ": Account "<< account_id << " is now closed. Balance was " << curr_balance << endl;
         }
-        break;
+        
 
     }
-    else if (!strcmp(letter, "T")){
+    else if (!strcmp(letter.c_str(), "T")){
     /*transfer money to target account: T <account> <password> <target_account> <amount>*/
         int src_account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -155,15 +154,15 @@ gets a command line and thread data struct and executes command*/
             log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<src_account_id <<" is incorrect" << endl;
             return;
         }
-        else if ( new_balance == -2 ){
+        else if ( new_balance_src == -2 ){
             log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<src_account_id <<" balance is lower than " << amount<< endl;
             return;
         }
         /*transfer amount to target account and check return value*/
-        int new_balance_target = bank_account.transfer_amount(int account_id, int amount);
+        int new_balance_target = bank_account.transfer_amount(target_account_id, amount);
         log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<new_balance_src << " new target account balance is " << new_balance_target<< endl;
 
-        break;
+        
     }
     else{
         // illegal command - maybe print something <3 -------------------------------------------------------------------------------
@@ -240,7 +239,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     all_treads_finished = false;
     // ********** create Bank units using threads ***********
     // create ATMs: (each ATM is responsible to handle one input file) (argc = num files + 1)
-    files_num = argc - 1;
+    int files_num = argc - 1;
     if (files_num <= 0) { // no files passed to handle
         fprintf(stderr, "Bank error: illegal arguments");
         return 1;
@@ -261,9 +260,9 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     int i, rc;
     /* create threads */
     for (i = 0; i < files_num; ++i) {
-        atm_threads_data[i]->thread_id = i;
-        atm_threads_data[i]->file_name = argv[i+1]; // ignore first argv - exe cmd // ask lior about [i] - dereference or pointer? 
-        if ((rc = pthread_create(&atm_threads[i], NULL, ???routin func??? , atm_threads_data[i]))) {  // ask lior about &
+        atm_threads_data[i].thread_id = i;
+        atm_threads_data[i].file_name = argv[i+1]; // ignore first argv - exe cmd // ask lior about [i] - dereference or pointer? 
+        if ((rc = pthread_create(&atm_threads[i], NULL, ATM_routine , &atm_threads_data[i]))) {  // ask lior about &
             perror("Bank error: pthread_create failed");
             return 1;
         }
