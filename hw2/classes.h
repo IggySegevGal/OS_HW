@@ -57,6 +57,11 @@ class accounts {
     int insert_account(account new_account); // return 0 by success and -1 if account id already exists
     int remove_account(int account_id, int password); // return 0 by success (correct password) and -1 if object was not found
     void print_accounts();
+    bool account_exists(int account_id); // get a boolian = true if account is in list, and false if not
+    int deposite_amount(int account_id, int password, int amount); // return balace by success (correct password)  -1 if password not correct
+    int transfer_amount(int account_id, int amount); // return new balace by success
+    int withdraw_amount(int account_id, int password, int amount); // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
+    int get_balance(int account_id, int password); // return account balance by success (correct password)  -1 if password not correct
 
 }
 

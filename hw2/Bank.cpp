@@ -9,13 +9,167 @@ using namespace std;
 bool all_treads_finished;
 /* init global bank accounts */
  accounts bank_account;
-
+fstream log_file;
 
 /* handle_command function
 gets a command line and thread data struct and executes command*/
  void  handle_command(string curr_command, thread_data_t * data){
+    /*ATM ID number*/
+    int ATM_id = data->thread_id;
 
- }
+    /*create a copy of curr commend to erase by token*/
+    string cpy_commend = curr_command;
+
+    /*initialize string array to save the commend*/
+    int commend_arr[4];
+    /*split commend by spaces*/
+    string delimiter = ' ';
+    size_t pos = 0;
+    int i = 0;
+    /*get letter command:*/
+    string letter = cpy_commend.substr(0, pos);
+    cpy_commend.erase(0, pos + delimiter.length());
+    /*get other numbers from input command*/
+    while ((pos = cpy_commend.find(delimiter)) != string::npos) {
+        try{
+        commend_arr[i] = stoi(cpy_commend.substr(0, pos));
+        cpy_commend.erase(0, pos + delimiter.length());
+        }
+        catch(...){
+            log_file << "Error "<< ATM_id << ": bad input ask lior" << endl;
+			return;
+        }
+        i++;
+    }
+
+    /*check if account exists - return error if not*/
+    if (!account_exists(commend_arr[0])) {
+        log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
+        return;
+    }
+
+    /*choose command*/
+    switch (letter)  {
+    case 'O':
+    /*open account: O <account> <password> <initial_amount> */
+        int account_id = commend_arr[0];
+        int password = commend_arr[1];
+        int initial_amount = commend_arr[2];
+
+        /*create new account */
+        account new_account = account(account_id, password, initial_amount);
+
+        /*check if account id already exists - if so, return error*/
+        if (account_exists(account_id) || bank_account.insert_account(new_account) == -1 ) {
+            log_file << "Error "<< ATM_id << ": Your transaction failed - account with the same id exists" << endl;
+            return;
+        }
+        log_file << ATM_id<< ": New account id is "<< account_id << " with password " << password << " and initial balance "<< initial_amount<< endl;
+        break;
+
+    case 'D':
+    /*deposite to account: D <account> <password> <amount> */
+        int account_id = commend_arr[0];
+        int password = commend_arr[1];
+        int amount = commend_arr[2];    
+        /*call deposire and check return value */
+        int new_balance = bank_account.deposite_amount(account_id,  password,  amount);
+        if (new_balance == -1){ // failed
+            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+            return;
+        }
+        else { // success
+            log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
+        }
+        break;
+
+    case 'W':
+    /*withdraw from account: W <account> <password> <amount>*/
+        int account_id = commend_arr[0];
+        int password = commend_arr[1];
+        int amount = commend_arr[2];    
+        /*call  withdraw_amount and check return value */
+        int new_balance = bank_account.withdraw_amount(account_id,  password,  amount);
+        if (new_balance == -1){ // failed
+            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+            return;
+        }
+        else if ( new_balance == -2 ){
+            log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<account_id <<" balance is lower than " << amount<< endl;
+            return;
+        }
+        else { // success
+            log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was withdrew"<< endl;
+        }
+        break;
+    
+    case 'B':
+    /*get balance B <account> <password>*/
+        int account_id = commend_arr[0];
+        int password = commend_arr[1];
+        
+        /*call get_balance and check return value */
+        int curr_balance = bank_account.get_balance(account_id, password);
+        if (curr_balance == -1){ // failed
+            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+            return;
+        }
+        else { // success
+            log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
+        }
+        break;
+    
+    case 'Q':
+    /*remove account: Q <account> <password>*/
+        int account_id = commend_arr[0];
+        int password = commend_arr[1];
+        
+        /*call remove_account and check return value */
+        int curr_balance = bank_account.remove_account(account_id, password);
+        if (curr_balance == -1){ // failed
+            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+            return;
+        }
+        else { // success
+            log_file << ATM_id<< ": Account "<< account_id << " is now closed. Balance was " << curr_balance << endl;
+        }
+        break;
+
+
+    case 'T':
+    /*transfer money to target account: T <account> <password> <target_account> <amount>*/
+        int src_account_id = commend_arr[0];
+        int password = commend_arr[1];
+        int target_account_id = commend_arr[2];
+        int amount = commend_arr[3];
+
+        /*check if target account exists*/
+        if (!account_exists(target_account_id)) {
+            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_account_id <<" does not exist" << endl;
+            return;
+        }
+
+        /*withdraw amount from source account and check return value*/
+        int new_balance_src = bank_account.withdraw_amount(src_account_id,  password,  amount);
+        if (new_balance_src == -1){ // failed
+            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<src_account_id <<" is incorrect" << endl;
+            return;
+        }
+        else if ( new_balance == -2 ){
+            log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<src_account_id <<" balance is lower than " << amount<< endl;
+            return;
+        }
+        /*transfer amount to target account and check return value*/
+        int new_balance_target = bank_account.transfer_amount(int account_id, int amount);
+        log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<new_balance_src << " new target account balance is " << new_balance_target<< endl;
+
+        break;
+    default:
+        // illegal command - maybe print something <3 -------------------------------------------------------------------------------
+        return;
+    }
+return;
+}
 
 /* ATM routine function
 get a file, and start executing commands line by line using handle_command */
@@ -35,7 +189,7 @@ void* ATM_routine(void* arg){
         ATMfile.close(); //close the file object.
     }
     else {
-        fprintf(stderr, "Bank error: open failed");
+        fprintf(stderr, "Bank error: illegal arguments"); // --------------------- maybe finish all threads ----------------------------------
         pthread_exit(NULL);
     }
     pthread_exit(NULL);
@@ -80,6 +234,13 @@ typedef struct _thread_data_t {
 // return 0 on success 1 on failure
 int main(int argc, char *argv[])  // responsible for initializing threads and calling them
 {
+    /* open or create log txt file*/
+    log_file.open("log.txt",ios::out);
+    if(!log_file){
+        fprintf(stderr, "Bank error: open failed"); /* ----------------------------------------------------------------check--------------------------------------------------------------------------*/
+        return 0;
+    }
+
     /*initialize finish flag to false*/
     all_treads_finished = false;
     // ********** create Bank units using threads ***********
@@ -114,24 +275,24 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     }
 
     /* init commision_thread_data */
-    commision_thread_data.thread_id = files_num; // last id
-    commision_thread_data.file_name = ""; 
+    //commision_thread_data.thread_id = files_num; // last id
+    //commision_thread_data.file_name = ""; 
     
     /* create commision handler: (responsible to collects commision every 3 seconds) */
-    if ((rc = pthread_create(&commision_thread, NULL, ???routin func commisiom??? , &commision_thread_data))) { //ask lior &
-            perror('Bank error: pthread_create failed');
-            return 1;
-    }
+    //if ((rc = pthread_create(&commision_thread, NULL, ???routin func commisiom??? , &commision_thread_data))) { //ask lior &
+    //        perror('Bank error: pthread_create failed');
+    //        return 1;
+    //}
 
     /* init print_thread_data */
-    print_thread_data.thread_id = files_num+1; // last id + 1
-    print_thread_data.file_name = ""; 
+    //print_thread_data.thread_id = files_num+1; // last id + 1
+    //print_thread_data.file_name = ""; 
 
     /* create print handler: (responsible to collects commision every 3 seconds) */
-    if ((rc = pthread_create(&print_thread, NULL, ???routin func commisiom??? , &print_thread_data))) { //ask lior &
-            perror('Bank error: pthread_create failed');
-            return 1;
-    }
+    //if ((rc = pthread_create(&print_thread, NULL, ???routin func commisiom??? , &print_thread_data))) { //ask lior &
+    //        perror('Bank error: pthread_create failed');
+    //        return 1;
+    //}
 
     /* block until all threads complete */
     for (int j = 0; j < files_num; ++j) {
@@ -142,8 +303,11 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     all_treads_finished = true;
 
     /*wait for print and commision threads to finish*/
-    pthread_join(print_thread, NULL);
-    pthread_join(commision_thread, NULL);
+    //pthread_join(print_thread, NULL);
+    //pthread_join(commision_thread, NULL);
+
+    /* close log txt file*/
+    log_file.close();
 
     delete[] atm_threads;
     delete[] atm_threads_data;

@@ -90,20 +90,18 @@
 
     }
 
-    int remove_account(int account_id, int password) { // return 0 by success and -1 if object was not found or 1 if password was not correct
-
+    int remove_account(int account_id, int password) { // return 0 by success and -2 if object was not found or -1 if password was not correct
       vector<account>::iterator it;
-      int account_removed = -1;
+      int return_balance = -2;
       for (int i=0 ; i < num_accounts; i++){
           if (accounts_vector[i].get_account_id() == account_id){
             
-            // check if password is correct - if not return 1
+            // check if password is correct - if not return -1
             if (accounts_vector[i].get_password() != password) {
-                return 1;
+                return -1;
             }
-
+            return_balance = accounts_vector[i].get_balance();
             accounts_vector.erase(accounts_vector.begin()+i);
-            account_removed = 0;
 			num_accounts = accounts_vector.size(); // update list size
             
             // update max account id if needed (removed old max)
@@ -115,16 +113,16 @@
 				    max_account_id = accounts_vector.back().get_account_id();
 				}
 			 }
-	        return account_removed;
+	        return return_balance;
           }
       }
-      return account_removed;
+      return return_balance;
     }
 
     void print_accounts(){
       //print first line:
       cout << "Current Bank Status" << endl;
-      std::vector<account>::iterator it;
+      vector<account>::iterator it;
       // print loop
       for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
          //print:
@@ -137,8 +135,79 @@
       cout << "The Bank has " << bank_balance << " $" << endl;
     }
 
+    bool account_exists(int account_id){ // get a boolian = true if account is in list, and false if not
+        vector<account>::iterator it;
+        bool exists = false;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+            if (it->get_account_id() == account_id){
+                exists = true;
+            }
+        }
+        return exists;
+    }
 
 
-    
+    int deposite_amount(int account_id, int password, int amount){ // return balace by success (correct password)  -1 if password not correct
+        // find account:
+        vector<account>::iterator it;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+            if(account_id == it->get_account_id()){
+                if (it->get_password() != password){
+                    return -1;
+                }
+                int curr_balance = it->get_balance();
+                it->set_balance(curr_balance + amount);
+                return curr_balance + amount;
+            }
+        }
+        return -1; // maybe return -2 (account not found)
 
+    }
 
+    int transfer_amount(int account_id, int amount){ // return balace or -1 if account not found
+        // find account:
+        vector<account>::iterator it;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+            if(account_id == it->get_account_id()){
+                int curr_balance = it->get_balance();
+                it->set_balance(curr_balance + amount);
+                return curr_balance + amount;
+            }
+        }
+        return -1; // maybe return -2 (account not found)
+
+    }
+
+    int withdraw_amount(int account_id, int password, int amount){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
+        // find account:
+        vector<account>::iterator it;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+            if(account_id == it->get_account_id()){
+                if (it->get_password() != password){
+                    return -1;
+                }
+                int curr_balance = it->get_balance();
+                /* check if there is enough balance - if not, return 1*/
+                if (amount > curr_balance) {
+                    return -2;
+                }
+                it->set_balance(curr_balance - amount);
+                return curr_balance - amount;
+            }
+        }
+        return -1; // maybe return -2 (account not found)
+    }
+    int get_balance(int account_id, int password){ // return account balance by success (correct password)  -1 if password not correct
+        // find account:
+        vector<account>::iterator it;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+            if(account_id == it->get_account_id()){
+                if (it->get_password() != password){
+                    return -1;
+                }
+                int curr_balance = it->get_balance();
+                return curr_balance;
+            }
+        }
+        return -1; // maybe return -2 (account not found)
+    }
