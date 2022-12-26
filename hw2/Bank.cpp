@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <fstream>
+#include "classes.h"
 using namespace std;
 
 /*globals*/
@@ -23,11 +24,11 @@ gets a command line and thread data struct and executes command*/
     /*initialize string array to save the commend*/
     int commend_arr[4];
     /*split commend by spaces*/
-    string delimiter = ' ';
+    string delimiter = " ";
     size_t pos = 0;
     int i = 0;
     /*get letter command:*/
-    string letter = cpy_commend.substr(0, pos);
+    char letter = cpy_commend.substr(0, pos);
     cpy_commend.erase(0, pos + delimiter.length());
     /*get other numbers from input command*/
     while ((pos = cpy_commend.find(delimiter)) != string::npos) {
@@ -43,7 +44,7 @@ gets a command line and thread data struct and executes command*/
     }
 
     /*check if account exists - return error if not*/
-    if (!account_exists(commend_arr[0])) {
+    if (!bank_account.account_exists(commend_arr[0])) {
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
         return;
     }
@@ -60,7 +61,7 @@ gets a command line and thread data struct and executes command*/
         account new_account = account(account_id, password, initial_amount);
 
         /*check if account id already exists - if so, return error*/
-        if (account_exists(account_id) || bank_account.insert_account(new_account) == -1 ) {
+        if (bank_account.insert_account(new_account) == -1) {
             log_file << "Error "<< ATM_id << ": Your transaction failed - account with the same id exists" << endl;
             return;
         }
@@ -144,7 +145,7 @@ gets a command line and thread data struct and executes command*/
         int amount = commend_arr[3];
 
         /*check if target account exists*/
-        if (!account_exists(target_account_id)) {
+        if (!bank_account.account_exists(target_account_id)) {
             log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_account_id <<" does not exist" << endl;
             return;
         }
@@ -223,12 +224,6 @@ void* print_routine(void* arg){
     pthread_exit(NULL);*/
 }
 
-/* create thread argument struct for thr_func() */
-typedef struct _thread_data_t {
-    int thread_id;
-    string file_name;
-} thread_data_t;
-
 
 // main function:
 // return 0 on success 1 on failure
@@ -269,7 +264,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
         atm_threads_data[i]->thread_id = i;
         atm_threads_data[i]->file_name = argv[i+1]; // ignore first argv - exe cmd // ask lior about [i] - dereference or pointer? 
         if ((rc = pthread_create(&atm_threads[i], NULL, ???routin func??? , atm_threads_data[i]))) {  // ask lior about &
-            perror('Bank error: pthread_create failed');
+            perror("Bank error: pthread_create failed");
             return 1;
         }
     }

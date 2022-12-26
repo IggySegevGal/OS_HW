@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cstring>
-#include <list>
+#include <vector>
 using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.
@@ -32,7 +32,7 @@ class account {
     void set_password(int new_password);
     void set_balance(int new_balance);
 
-}
+};
 
 // ********************************* accounts class: ******************************************************
 class accounts {
@@ -63,22 +63,13 @@ class accounts {
     int withdraw_amount(int account_id, int password, int amount); // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
     int get_balance(int account_id, int password); // return account balance by success (correct password)  -1 if password not correct
 
-}
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* create thread argument struct for thr_func() */
+typedef struct _thread_data_t {
+    int thread_id;
+    string file_name;
+} thread_data_t;
 
 
 #endif
