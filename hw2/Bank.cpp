@@ -28,7 +28,7 @@ gets a command line and thread data struct and executes command*/
     size_t pos = 0;
     int i = 0;
     /*get letter command:*/
-    char letter = cpy_commend.substr(0, pos);
+    string letter = cpy_commend.substr(0, pos);
     cpy_commend.erase(0, pos + delimiter.length());
     /*get other numbers from input command*/
     while ((pos = cpy_commend.find(delimiter)) != string::npos) {
@@ -50,8 +50,7 @@ gets a command line and thread data struct and executes command*/
     }
 
     /*choose command*/
-    switch (letter)  {
-    case 'O':
+    if (!strcmp(letter, "O")){
     /*open account: O <account> <password> <initial_amount> */
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -67,8 +66,8 @@ gets a command line and thread data struct and executes command*/
         }
         log_file << ATM_id<< ": New account id is "<< account_id << " with password " << password << " and initial balance "<< initial_amount<< endl;
         break;
-
-    case 'D':
+    }
+    else if (!strcmp(letter, "D")){
     /*deposite to account: D <account> <password> <amount> */
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -83,8 +82,8 @@ gets a command line and thread data struct and executes command*/
             log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
         }
         break;
-
-    case 'W':
+    }
+    else if (!strcmp(letter, "W")){
     /*withdraw from account: W <account> <password> <amount>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -103,8 +102,8 @@ gets a command line and thread data struct and executes command*/
             log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was withdrew"<< endl;
         }
         break;
-    
-    case 'B':
+    }
+    else if (!strcmp(letter, "B")){
     /*get balance B <account> <password>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -119,8 +118,8 @@ gets a command line and thread data struct and executes command*/
             log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
         }
         break;
-    
-    case 'Q':
+    }
+    else if (!strcmp(letter, "Q")){
     /*remove account: Q <account> <password>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -136,8 +135,8 @@ gets a command line and thread data struct and executes command*/
         }
         break;
 
-
-    case 'T':
+    }
+    else if (!strcmp(letter, "T")){
     /*transfer money to target account: T <account> <password> <target_account> <amount>*/
         int src_account_id = commend_arr[0];
         int password = commend_arr[1];
@@ -165,7 +164,8 @@ gets a command line and thread data struct and executes command*/
         log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<new_balance_src << " new target account balance is " << new_balance_target<< endl;
 
         break;
-    default:
+    }
+    else{
         // illegal command - maybe print something <3 -------------------------------------------------------------------------------
         return;
     }
