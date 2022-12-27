@@ -20,22 +20,25 @@ gets a command line and thread data struct and executes command*/
     int ATM_id = data->thread_id;
 
     /*create a copy of curr commend to erase by token*/
-    string cpy_commend = curr_command;
+    string cpy_command = curr_command;
 
     /*initialize string array to save the commend*/
     int commend_arr[4];
     /*split commend by spaces*/
     string delimiter = " ";
-    size_t pos = 0;
     int i = 0;
+    int start = 0;
+    int end = cpy_command.find(delimiter);
     /*get letter command:*/
-    string letter = cpy_commend.substr(0, pos);
-    cpy_commend.erase(0, pos + delimiter.length());
+    string letter = cpy_command.substr(start, end - start);
+    //
+    start = end + delimiter.size();
+    end = cpy_command.find(delimiter, start);
     /*get other numbers from input command*/
-    while ((pos = cpy_commend.find(delimiter)) != string::npos) {
-        try{
-        commend_arr[i] = stoi(cpy_commend.substr(0, pos));
-        cpy_commend.erase(0, pos + delimiter.length());
+    while (end != -1) {
+        try{ commend_arr[i] = stoi(cpy_command.substr(start, end - start));
+        start = end + delimiter.size();
+        end = cpy_command.find(delimiter, start);
         }
         catch(...){
             log_file << "Error "<< ATM_id << ": bad input ask lior" << endl;
@@ -43,7 +46,12 @@ gets a command line and thread data struct and executes command*/
         }
         i++;
     }
-
+    try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
+    catch(...){
+            log_file << "Error "<< ATM_id << ": bad input ask lior" << endl;
+			return;
+    }
+    //
     /*check if account exists - return error if not*/
     if (!bank_account.account_exists(commend_arr[0])) {
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
