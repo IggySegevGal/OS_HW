@@ -198,8 +198,8 @@ void* ATM_routine(void* arg){
         ATMfile.close(); //close the file object.
     }
     else {
-        fprintf(stderr, "Bank error: illegal arguments"); // --------------------- maybe finish all threads ----------------------------------
-        pthread_exit(NULL);
+        fprintf(stderr, "Bank error: illegal arguments");
+        exit(1);
     }
     pthread_exit(NULL);
 }
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     log_file.open("log.txt",ios::out);
     if(!log_file){
         fprintf(stderr, "Bank error: open failed"); /* ----------------------------------------------------------------check--------------------------------------------------------------------------*/
-        return 0;
+        exit(1);
     }
 
     /*initialize finish flag to false*/
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     int files_num = argc - 1;
     if (files_num <= 0) { // no files passed to handle
         fprintf(stderr, "Bank error: illegal arguments");
-        return 1;
+        exit(1);
     }
 
     // create ATMs threads array for each file 
