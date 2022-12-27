@@ -7,6 +7,7 @@
 		this->account_id = account_id;
 		this->password = password;
 		this->balance = balance;
+        this->readers_writers_account.init();
 	}
 
     // destructor
@@ -15,24 +16,38 @@
 
     //getters:
     int account::get_account_id(){
-        //mutex
-        return account_id;
+        readers_writers_account.enter_reader();
+        int rt = account_id;
+        readers_writers_account.leave_reader();
+        return rt;
     }
     int account::get_password(){
-        return password;
+        readers_writers_account.enter_reader();
+        int rt = password;
+        readers_writers_account.leave_reader();
+        return rt;
     }
     int account::get_balance(){
-        return balance;
+        readers_writers_account.enter_reader();
+        int rt = balance;
+        readers_writers_account.leave_reader();
+        return rt;
     }
     //setters:
     void account::set_account_id(int new_account_id){
+        readers_writers_account.enter_writer();
         this->account_id = new_account_id;
+        readers_writers_account.leave_writer();
     }
     void account::set_password(int new_password){
+        readers_writers_account.enter_writer();
         this->password = new_password;
+        readers_writers_account.leave_writer();
     }
     void account::set_balance(int new_balance){
+        readers_writers_account.enter_writer();
         this->balance = new_balance;
+        readers_writers_account.leave_writer();
     }
 // ---------------------- accounts class functions: -----------------------------------
 

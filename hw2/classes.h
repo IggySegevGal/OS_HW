@@ -14,6 +14,7 @@ class account {
     int account_id; // an int
     int password; // can be assumed that the password is a 4 digits number that never starts with zero
     int balance; // always greater or equal to zero 
+    readers_writers readers_writers_account;
 
     public: // maybe to be protected by readers writers!!!!!!! ->
     // constructors
@@ -71,5 +72,39 @@ typedef struct _thread_data_t {
     string file_name;
 } thread_data_t;
 
+/*reader writers class*/
+class readers_writers {
+    private:
+        mutex m;
+        mutex writers;
+        int readers;
+    public:
+        init() {
+            readers = 0;
+            m = unlocked, writers = unlocked;
+        }
+        enter_reader() {
+            lock(m);
+            readers++;
+            if(readers == 1){
+                lock(writers);
+            }    
+            unlock(m)
+        }
+        enter_writer() {
+            lock(writers);
+        }
+        leave_reader() {
+            lock(m);
+            readers --;
+            if(readers == 0){
+                unlock(writers);
+            }
+            unlock(m)
+        }
+        leave_writer() {
+            unlock(writers);
+        }
+};
 
 #endif
