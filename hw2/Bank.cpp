@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <fstream>
+#include <pthread.h>
 #include "classes.h"
 using namespace std;
 
@@ -198,9 +199,9 @@ void* ATM_routine(void* arg){
 
 /* commissions routine function
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
-void* commisions_routine(void* arg){
+//void* commisions_routine(void* arg){
     /*cast input to thread data*/
-    thread_data_t *data= (thread_data_t *)arg;
+//    thread_data_t *data= (thread_data_t *)arg;
     
     /*every 3 seconds, do:
     randomly select number between 1-5 %*/
@@ -208,20 +209,22 @@ void* commisions_routine(void* arg){
     /* for each account - remove ((int)(account_balace * rand_num / 100)) and add to bank balance*/
     /* if (all_treads_finished) - global variable
     pthread_exit(NULL);*/
-}
+//return 0;
+//}
 
 /* print routine function
 responsible for printing every half a second*/
-void* print_routine(void* arg){
+//void* print_routine(void* arg){
     /*cast input to thread data*/
-    thread_data_t *data= (thread_data_t *)arg;
+//    thread_data_t *data= (thread_data_t *)arg;
     
     /*every half second, do:
     print all numbers (it's ok to wait if accounts are blocked)*/
 
     /* if (all_treads_finished) - global variable
     pthread_exit(NULL);*/
-}
+//return 0;
+//}
 
 
 // main function:
@@ -250,17 +253,17 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     thread_data_t* atm_threads_data = new thread_data_t[files_num]; // ask lior about using new and initializing array with changing size
     
     // create commision thread 
-    pthread_t commision_thread; 
-    thread_data_t commision_thread_data;
+    //pthread_t commision_thread; 
+    //thread_data_t commision_thread_data;
 
     // create print thread 
-    pthread_t print_thread; 
-    thread_data_t print_thread_data;
+    //pthread_t print_thread; 
+    //thread_data_t print_thread_data;
     
     int i, rc;
     /* create threads */
     for (i = 0; i < files_num; ++i) {
-        atm_threads_data[i].thread_id = i;
+        atm_threads_data[i].thread_id = i+1; // start from 1
         atm_threads_data[i].file_name = argv[i+1]; // ignore first argv - exe cmd // ask lior about [i] - dereference or pointer? 
         if ((rc = pthread_create(&atm_threads[i], NULL, ATM_routine , &atm_threads_data[i]))) {  // ask lior about &
             perror("Bank error: pthread_create failed");
