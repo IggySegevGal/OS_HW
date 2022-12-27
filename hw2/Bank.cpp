@@ -53,7 +53,7 @@ gets a command line and thread data struct and executes command*/
     }
     //
     /*check if account exists - return error if not*/
-    if (!bank_account.account_exists(commend_arr[0])) {
+    if (!bank_account.account_exists(commend_arr[0]) && strcmp(letter.c_str(), "O") != 0) {
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
         return;
     }
