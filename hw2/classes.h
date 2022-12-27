@@ -38,9 +38,10 @@ class account {
     int account_id; // an int
     int password; // can be assumed that the password is a 4 digits number that never starts with zero
     int balance; // always greater or equal to zero 
-    readers_writers readers_writers_account;
+    
 
     public: // maybe to be protected by readers writers!!!!!!! ->
+    readers_writers readers_writers_account;
     // constructors
    account(int account_id,int password,int balance);
 
@@ -66,9 +67,9 @@ class accounts {
     int num_accounts;
     int max_account_id;
     int bank_balance;
-    readers_writers readers_writers_bank_accounts;
 
     public:
+    readers_writers readers_writers_bank_accounts;
     // constructors
    accounts();
 

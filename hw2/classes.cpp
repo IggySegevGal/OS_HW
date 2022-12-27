@@ -142,6 +142,7 @@
     }
 
     void accounts::print_accounts(){ /*wait for forum and maybe changeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee*/
+    vector<account>::iterator it;
       readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
       // this is here to make sure the print is updated to last state and no changes while printing
       for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
@@ -149,7 +150,6 @@
       }
       //print first line:
       cout << "Current Bank Status" << endl;
-      vector<account>::iterator it;
       // print loop
       for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
          //print:
