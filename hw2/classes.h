@@ -9,6 +9,29 @@ using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.
 // (MAYBE WE SOULD DO IT HERE?)
+
+
+/*reader writers class*/
+class readers_writers {
+    private:
+        pthread_mutex_t m;
+        pthread_mutex_t writers;
+        int readers;
+    public:
+        // constructor 
+        readers_writers();
+
+        // destructor
+        ~readers_writers();
+        
+        // method functions
+        void enter_reader();
+        void enter_writer();
+        void leave_reader();
+        void leave_writer();
+};
+
+
 // ********************************* account class: ******************************************************
 class account {
     private:
@@ -73,25 +96,5 @@ typedef struct _thread_data_t {
     int thread_id;
     string file_name;
 } thread_data_t;
-
-/*reader writers class*/
-class readers_writers {
-    private:
-        pthread_mutex_t m;
-        pthread_mutex_t writers;
-        int readers;
-    public:
-        // constructor 
-        readers_writers();
-
-        // destructor
-        ~readers_writers();
-        
-        // method functions
-        void enter_reader();
-        void enter_writer();
-        void leave_reader();
-        void leave_writer();
-};
 
 #endif
