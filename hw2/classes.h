@@ -77,37 +77,21 @@ typedef struct _thread_data_t {
 /*reader writers class*/
 class readers_writers {
     private:
-        int readers;
-    public:
         pthread_mutex_t m;
         pthread_mutex_t writers;
-        init() {
-            readers = 0;
-            pthread_mutex_init(&m,NULL);
-            pthread_mutex_init(&writers,NULL); /********************************check init value*************************************/
-        }
-        enter_reader() {
-            pthread_mutex_lock(&m);
-            readers++;
-            if(readers == 1){
-                pthread_mutex_lock(&writers);
-            }    
-            pthread_mutex_unlock(&m)
-        }
-        enter_writer() {
-            pthread_mutex_lock(&writers);
-        }
-        leave_reader() {
-            pthread_mutex_lock(&m);
-            readers --;
-            if(readers == 0){
-                pthread_mutex_unlock(&writers);
-            }
-            pthread_mutex_unlock(&m)
-        }
-        leave_writer() {
-            pthread_mutex_unlock(&writers);
-        }
+        int readers;
+    public:
+        // constructor 
+        readers_writers();
+
+        // destructor
+        ~readers_writers();
+        
+        // method functions
+        void enter_reader();
+        void enter_writer();
+        void leave_reader();
+        void leave_writer();
 };
 
 #endif

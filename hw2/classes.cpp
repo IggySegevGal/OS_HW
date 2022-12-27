@@ -7,7 +7,6 @@
 		this->account_id = account_id;
 		this->password = password;
 		this->balance = balance;
-        this->readers_writers_account.init();
 	}
 
     // destructor
@@ -56,7 +55,6 @@
         num_accounts = 0;
         max_account_id = 0;
         bank_balance = 0;
-        readers_writers_bank_accounts.init();
 	}
 
     // destructor
@@ -76,7 +74,7 @@
    	
     // insert a new account to class - insert from the back of the vector to maintain account_id order
     int accounts::insert_account(account new_account){ // return 0 by success and -1 if account id already exists
-/*---------------------------------------ask lior------------------------------------------------------------------------------------------*/
+/*----------ask lior--------*/
         readers_writers_bank_accounts.enter_writer();
         // if id is bigger than current max id - add it to the end of the list and update max id:
 		if(max_account_id < new_account.get_account_id()){
@@ -110,7 +108,7 @@
     }
 
     int accounts::remove_account(int account_id, int password) { // return 0 by success and -2 if object was not found or -1 if password was not correct
-    /*--------------------------------------------ask lior----------------------------------------------------------------------------*/
+    /*-------ask lior------*/
       readers_writers_bank_accounts.enter_writer();
       vector<account>::iterator it;
       int return_balance = -2;
@@ -123,8 +121,6 @@
                 return -1;
             }
             return_balance = accounts_vector[i].get_balance();
-            pthread_mutex_destroy(&accounts_vector[i].readers_writers.m);
-            pthread_mutex_destroy(&accounts_vector[i].readers_writers.writers);
             accounts_vector.erase(accounts_vector.begin()+i);
 			num_accounts = accounts_vector.size(); // update list size
             
@@ -274,3 +270,43 @@
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
+
+
+// ---------------------- readers writers class functions: -----------------------------------
+        // constructor
+        readers_writers::readers_writers() {
+            readers = 0;
+            pthread_mutex_init(&m,NULL);
+            pthread_mutex_init(&writers,NULL); /********************************check init value*************************************/
+        }
+        // destructor
+        readers_writers::~readers_writers() {
+            pthread_mutex_destroy(&m);
+            pthread_mutex_destroy(&writers);
+        }
+        void readers_writers::enter_reader() {
+            pthread_mutex_lock(&m);
+            readers++;
+            if(readers == 1){
+                pthread_mutex_lock(&writers);
+            }    
+            pthread_mutex_unlock(&m);
+            return;
+        }
+        void readers_writers::enter_writer() {
+            pthread_mutex_lock(&writers);
+            return;
+        }
+        void readers_writers::leave_reader() {
+            pthread_mutex_lock(&m);
+            readers --;
+            if(readers == 0){
+                pthread_mutex_unlock(&writers);
+            }
+            pthread_mutex_unlock(&m);
+            return;
+        }
+        void readers_writers::leave_writer() {
+            pthread_mutex_unlock(&writers);
+            return;
+        }
