@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <pthread.h>
 using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.
@@ -42,6 +43,7 @@ class accounts {
     int num_accounts;
     int max_account_id;
     int bank_balance;
+    readers_writers readers_writers_bank_accounts;
 
     public:
     // constructors
@@ -75,35 +77,36 @@ typedef struct _thread_data_t {
 /*reader writers class*/
 class readers_writers {
     private:
-        mutex m;
-        mutex writers;
         int readers;
     public:
+        pthread_mutex_t m;
+        pthread_mutex_t writers;
         init() {
             readers = 0;
-            m = unlocked, writers = unlocked;
+            pthread_mutex_init(&m,NULL);
+            pthread_mutex_init(&writers,NULL); /********************************check init value*************************************/
         }
         enter_reader() {
-            lock(m);
+            pthread_mutex_lock(&m);
             readers++;
             if(readers == 1){
-                lock(writers);
+                pthread_mutex_lock(&writers);
             }    
-            unlock(m)
+            pthread_mutex_unlock(&m)
         }
         enter_writer() {
-            lock(writers);
+            pthread_mutex_lock(&writers);
         }
         leave_reader() {
-            lock(m);
+            pthread_mutex_lock(&m);
             readers --;
             if(readers == 0){
-                unlock(writers);
+                pthread_mutex_unlock(&writers);
             }
-            unlock(m)
+            pthread_mutex_unlock(&m)
         }
         leave_writer() {
-            unlock(writers);
+            pthread_mutex_unlock(&writers);
         }
 };
 
