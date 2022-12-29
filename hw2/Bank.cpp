@@ -10,12 +10,12 @@ using namespace std;
 /*globals*/
 bool all_treads_finished;
 /* init global bank accounts */
- accounts bank_account;
+accounts bank_account;
 fstream log_file;
 
 /* handle_command function
 gets a command line and thread data struct and executes command*/
- void  handle_command(string curr_command, thread_data_t * data){
+void  handle_command(string curr_command, thread_data_t * data){
     /*ATM ID number*/
     int ATM_id = data->thread_id;
 
@@ -48,7 +48,7 @@ gets a command line and thread data struct and executes command*/
     }
     try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
     catch(...){
-            log_file << "Error "<< ATM_id << ": bad input ask lior" << endl;
+            log_file << "Error "<< ATM_id << ": bad input ask lior2" << endl;
 			return;
     }
     //
@@ -68,12 +68,8 @@ gets a command line and thread data struct and executes command*/
         /*create new account */
         account new_account = account(account_id, password, initial_amount);
 
-        /*check if account id already exists - if so, return error*/
-        if (bank_account.insert_account(new_account) == -1) {
-            log_file << "Error "<< ATM_id << ": Your transaction failed - account with the same id exists" << endl;
-            return;
-        }
-        log_file << ATM_id<< ": New account id is "<< account_id << " with password " << password << " and initial balance "<< initial_amount<< endl;
+        /*try to insert account*/
+        bank_account.insert_account(new_account,ATM_id)
     }
     else if (!strcmp(letter.c_str(), "D")){
     /*deposite to account: D <account> <password> <amount> */
@@ -133,16 +129,7 @@ gets a command line and thread data struct and executes command*/
         int password = commend_arr[1];
         
         /*call remove_account and check return value */
-        int curr_balance = bank_account.remove_account(account_id, password);
-        if (curr_balance == -1){ // failed
-            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
-            return;
-        }
-        else { // success
-            log_file << ATM_id<< ": Account "<< account_id << " is now closed. Balance was " << curr_balance << endl;
-        }
-        
-
+        bank_account.remove_account(account_id, password,ATM_id);
     }
     else if (!strcmp(letter.c_str(), "T")){
     /*transfer money to target account: T <account> <password> <target_account> <amount>*/

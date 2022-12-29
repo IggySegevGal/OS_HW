@@ -73,7 +73,7 @@ extern fstream log_file;
    // **************** method functions: **************************
    	
     // insert a new account to class - insert from the back of the vector to maintain account_id order
-    int accounts::insert_account(account new_account){ // return 0 by success and -1 if account id already exists
+    int accounts::insert_account(account new_account, int ATM_id){ // return 0 by success and -1 if account id already exists
 /*----------ask lior--------*/
         readers_writers_bank_accounts.enter_writer();
         // if id is bigger than current max id - add it to the end of the list and update max id:
@@ -88,6 +88,7 @@ extern fstream log_file;
 			for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
                 // account already exists - error and return:
 				if(new_account.get_account_id() == it->get_account_id()){
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - account with the same id exists" << endl;
                     sleep(1);
                     readers_writers_bank_accounts.leave_writer();
 					return -1;
@@ -103,7 +104,8 @@ extern fstream log_file;
 				}
 			}
 		}
-
+        
+        log_file << ATM_id<< ": New account id is "<< new_account.get_account_id() << " with password " << new_account.get_password() << " and initial balance "<< new_account.get_balance()<< endl;
 		num_accounts = accounts_vector.size(); // update list size
         sleep(1);
         readers_writers_bank_accounts.leave_writer();
@@ -111,7 +113,7 @@ extern fstream log_file;
 
     }
 
-    int accounts::remove_account(int account_id, int password) { // return 0 by success and -2 if object was not found or -1 if password was not correct
+    int accounts::remove_account(int account_id, int password,int ATM_id) { // return 0 by success and -2 if object was not found or -1 if password was not correct
     /*-------ask lior------*/
       readers_writers_bank_accounts.enter_writer();
       vector<account>::iterator it;
@@ -121,6 +123,7 @@ extern fstream log_file;
             
             // check if password is correct - if not return -1
             if (accounts_vector[i].get_password() != password) {
+                log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                 sleep(1);
                 readers_writers_bank_accounts.leave_writer();
                 return -1;
@@ -140,11 +143,13 @@ extern fstream log_file;
 				    max_account_id = accounts_vector.back().get_account_id();
 				}
 			 }
+             log_file << ATM_id<< ": Account "<< account_id << " is now closed. Balance was " << return_balance << endl;
              sleep(1);
              readers_writers_bank_accounts.leave_writer();
 	        return return_balance;
           }
       }
+      log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
       /*account not found - return:*/
       readers_writers_bank_accounts.leave_writer();
       sleep(1);
