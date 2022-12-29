@@ -230,7 +230,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     
     /* create commision handler: (responsible to collects commision every 3 seconds) */
     if ((rc = pthread_create(&commision_thread, NULL, commisions_routine , NULL))) { //ask lior &
-            perror('Bank error: pthread_create failed');
+            perror("Bank error: pthread_create failed");
             return 1;
     }
 
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
 
     /* create print handler: (responsible to collects commision every 3 seconds) */
     //if ((rc = pthread_create(&print_thread, NULL, ???routin func commisiom??? , &print_thread_data))) { //ask lior &
-    //        perror('Bank error: pthread_create failed');
+    //        perror("Bank error: pthread_create failed");
     //        return 1;
     //}
 

@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <cstdlib>
+#include <cmath>
 using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.

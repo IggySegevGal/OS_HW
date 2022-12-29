@@ -383,25 +383,27 @@ extern fstream log_file;
     }
     
     void accounts::take_commission(){
-        
+
+        vector<account>::iterator it;
+	int commission_toremove = 0;
+        int curr_balance = 0;
         /*randomly select number between 1-5*/
         int lb = 1, ub = 5;/*lower bound and upper bound*/
         int rand_num = ((rand() % (ub - lb + 1)) + lb);
-
+	
         /*lock the bank accounts*/
         readers_writers_bank_accounts.enter_writer();
-
+	
         /* for each account - remove ((int)(account_balace * rand_num / 100)) and add to bank balance*/
-        int commission_toremove = 0;
-        int curr_balance = 0;
+        
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             curr_balance = it->get_balance();
-            commission_toremove = (int)( (rand_num * curr_balance) / 100 ); /*check if round to the closeset int and not up*/ 
+            commission_toremove = round( (double)(rand_num * curr_balance) / 100 ); /*check if round to the closeset int and not up*/ 
             it->set_balance(curr_balance - commission_toremove);
             bank_balance += commission_toremove;
 
             /*print message to log*/
-            log_file << "Bank: commissions of "<< rand_num <<" % were charged, the bank gained " <<commission_toremove<< " $ from account "<< it->get_account_id << endl;
+            log_file << "Bank: commissions of "<< rand_num <<" % were charged, the bank gained " <<commission_toremove<< " $ from account "<< it->get_account_id() << endl;
         }
         /*unlock the bank accounts*/
         readers_writers_bank_accounts.leave_writer();
