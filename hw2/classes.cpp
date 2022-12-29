@@ -398,7 +398,7 @@ extern fstream log_file;
         
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             curr_balance = it->get_balance();
-            commission_toremove = round( (double)(rand_num * curr_balance) / 100 ); /*check if round to the closeset int and not up*/ 
+            commission_toremove = round( (double)(rand_num * curr_balance) / 100 ); 
             it->set_balance(curr_balance - commission_toremove);
             bank_balance += commission_toremove;
 

@@ -140,7 +140,7 @@ void* ATM_routine(void* arg){
         ATMfile.close(); //close the file object.
     }
     else {
-        fprintf(stderr, "Bank error: illegal arguments");
+        fprintf(stderr, "Bank error: illegal arguments\n");
         exit(1);
     }
     pthread_exit(NULL);
@@ -150,16 +150,14 @@ void* ATM_routine(void* arg){
 /* commissions routine function
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
 void* commisions_routine(void* arg){
-    /*cast input to thread data*/
-    //thread_data_t *data= (thread_data_t *)arg;
     
     /*every 3 seconds, do:*/
     while(!all_treads_finished){
         sleep(3);
         /*call commission function*/
         bank_account.take_commission();
-
     }
+
     /* if (all_treads_finished) - global variable*/
     pthread_exit(NULL);
 
@@ -167,17 +165,19 @@ void* commisions_routine(void* arg){
 
 /* print routine function
 responsible for printing every half a second*/
-//void* print_routine(void* arg){
-    /*cast input to thread data*/
-//    thread_data_t *data= (thread_data_t *)arg;
-    
+void* print_routine(void* arg){
+
     /*every half second, do:
     print all numbers (it's ok to wait if accounts are blocked)*/
+    while(!all_treads_finished){
+        sleep(0.5);
+        /*call commission function*/
+        bank_account.print_accounts();
+    }
 
-    /* if (all_treads_finished) - global variable
-    pthread_exit(NULL);*/
-//return 0;
-//}
+    /* if (all_treads_finished) - global variable*/
+    pthread_exit(NULL);
+}
 
 
 // main function:
@@ -207,11 +207,9 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     
     // create commision thread 
     pthread_t commision_thread; 
-    //thread_data_t commision_thread_data;
 
     // create print thread 
-    //pthread_t print_thread; 
-    //thread_data_t print_thread_data;
+    pthread_t print_thread; 
     
     int i, rc;
     /* create threads */
@@ -224,25 +222,17 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
         }
     }
 
-    /* init commision_thread_data */
-    //commision_thread_data.thread_id = files_num; // last id
-    //commision_thread_data.file_name = ""; 
-    
     /* create commision handler: (responsible to collects commision every 3 seconds) */
     if ((rc = pthread_create(&commision_thread, NULL, commisions_routine , NULL))) { //ask lior &
             perror("Bank error: pthread_create failed");
             return 1;
     }
 
-    /* init print_thread_data */
-    //print_thread_data.thread_id = files_num+1; // last id + 1
-    //print_thread_data.file_name = ""; 
-
     /* create print handler: (responsible to collects commision every 3 seconds) */
-    //if ((rc = pthread_create(&print_thread, NULL, ???routin func commisiom??? , &print_thread_data))) { //ask lior &
-    //        perror("Bank error: pthread_create failed");
-    //        return 1;
-    //}
+    if ((rc = pthread_create(&print_thread, NULL, print_routine , NULL))) { //ask lior &
+            perror("Bank error: pthread_create failed");
+            return 1;
+    }
 
     /* block until all threads complete */
     for (int j = 0; j < files_num; ++j) {
@@ -253,7 +243,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     all_treads_finished = true;
 
     /*wait for print and commision threads to finish*/
-    //pthread_join(print_thread, NULL);
+    pthread_join(print_thread, NULL);
     pthread_join(commision_thread, NULL);
 
     /* close log txt file*/
