@@ -86,12 +86,15 @@
             // first check if account id already exists in vector
             vector<account>::iterator it;
 			for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
+                // account already exists - error and return:
 				if(new_account.get_account_id() == it->get_account_id()){
+                    sleep(1);
                     readers_writers_bank_accounts.leave_writer();
 					return -1;
 				}
 			}
 
+            /*success:*/
             // if account id does not exist, and id is not bigger than max - add id where it belongs in the list:
 			for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
 				if(new_account.get_account_id() < it->get_account_id()){
@@ -102,6 +105,7 @@
 		}
 
 		num_accounts = accounts_vector.size(); // update list size
+        sleep(1);
         readers_writers_bank_accounts.leave_writer();
     	return 0;
 
@@ -117,9 +121,12 @@
             
             // check if password is correct - if not return -1
             if (accounts_vector[i].get_password() != password) {
+                sleep(1);
                 readers_writers_bank_accounts.leave_writer();
                 return -1;
             }
+            
+            /*success:*/
             return_balance = accounts_vector[i].get_balance();
             accounts_vector.erase(accounts_vector.begin()+i);
 			num_accounts = accounts_vector.size(); // update list size
@@ -133,11 +140,14 @@
 				    max_account_id = accounts_vector.back().get_account_id();
 				}
 			 }
+             sleep(1);
              readers_writers_bank_accounts.leave_writer();
 	        return return_balance;
           }
       }
+      /*account not found - return:*/
       readers_writers_bank_accounts.leave_writer();
+      sleep(1);
       return return_balance;
     }
 
@@ -145,6 +155,7 @@
     vector<account>::iterator it;
       readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
       // this is here to make sure the print is updated to last state and no changes while printing
+      /*enter all accounts as reader*/
       for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
         it->readers_writers_account.enter_reader();
       }
@@ -160,6 +171,8 @@
       
       //print last line:
       cout << "The Bank has " << bank_balance << " $" << endl;
+
+      /*leave all accounts as reader*/
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
         it->readers_writers_account.leave_reader();
       }
@@ -187,19 +200,26 @@
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
-            if(account_id == it->get_account_id()){//get_account_id doesn't change
-                if (it->get_password() != password){//password doesn't change
+            if(account_id == it->get_account_id()){
+                if (it->get_password() != password){
+                    /*incorrect password - return;*/
+                    sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
                 }
+
+                /*success:*/
                 it->readers_writers_account.enter_writer();
                 int curr_balance = it->get_balance();
                 it->set_balance(curr_balance + amount);
+                sleep(1);
                 it->readers_writers_account.leave_writer();
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance + amount;
             }
         }
+         /*account not found - return;*/
+        sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
 
@@ -211,14 +231,19 @@
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){// account_id doesn't change
+                /*success:*/
                 it->readers_writers_account.enter_writer();
                 int curr_balance = it->get_balance();
                 it->set_balance(curr_balance + amount);
+                sleep(1);
                 it->readers_writers_account.leave_writer();
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance + amount;
             }
         }
+        
+        /*account not found - return;*/
+        sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
@@ -228,8 +253,10 @@
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
-            if(account_id == it->get_account_id()){ // account_id doesn't change
-                if (it->get_password() != password){ // password doesn't change
+            if(account_id == it->get_account_id()){ 
+                if (it->get_password() != password){ 
+                    /*incorrect password - return;*/
+                    sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
                 }
@@ -237,36 +264,48 @@
                 int curr_balance = it->get_balance();
                 /* check if there is enough balance - if not, return 1*/
                 if (amount > curr_balance) {
+                    sleep(1);
                     it->readers_writers_account.leave_writer(); // leave writer from account
                     readers_writers_bank_accounts.leave_reader(); 
                     return -2;
                 }
+
+                /*success:*/
                 it->set_balance(curr_balance - amount);
+                sleep(1);
                 it->readers_writers_account.leave_writer(); // leave writer from account
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance - amount;
             }
         }
+        /*account not found - return;*/
+        sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
-    int accounts::get_balance(int account_id, int password){ // return account balance by success (correct password)  -1 if password not correct
+    int accounts::check_balance(int account_id, int password){ // return account balance by success (correct password)  -1 if password not correct
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){
+                // wrong password - return 
                 if (it->get_password() != password){
+                    sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
                 }
+                /*success:*/
                 it->readers_writers_account.enter_reader(); // enter reader to account
                 int curr_balance = it->get_balance();
-                it->readers_writers_account.leave_reader(); // enter reader to account
+                sleep(1);
+                it->readers_writers_account.leave_reader(); // leave reader to account
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance;
             }
         }
+        // account not found: (not supposed to get here)
+        sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }

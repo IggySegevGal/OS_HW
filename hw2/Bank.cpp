@@ -80,7 +80,7 @@ gets a command line and thread data struct and executes command*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
         int amount = commend_arr[2];    
-        /*call deposire and check return value */
+        /*call deposite and check return value */
         int new_balance = bank_account.deposite_amount(account_id,  password,  amount);
         if (new_balance == -1){ // failed
             log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
@@ -116,8 +116,8 @@ gets a command line and thread data struct and executes command*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
         
-        /*call get_balance and check return value */
-        int curr_balance = bank_account.get_balance(account_id, password);
+        /*call check_balance and check return value */
+        int curr_balance = bank_account.check_balance(account_id, password);
         if (curr_balance == -1){ // failed
             log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
             return;
@@ -194,6 +194,7 @@ void* ATM_routine(void* arg){
         string curr_command;
         while(getline(ATMfile, curr_command)){ //read data from file object and put it into string.
             handle_command(curr_command, data);
+            sleep(0.1);
         }
         ATMfile.close(); //close the file object.
     }

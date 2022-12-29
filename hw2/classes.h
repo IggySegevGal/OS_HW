@@ -88,7 +88,7 @@ class accounts {
     int deposite_amount(int account_id, int password, int amount); // return balace by success (correct password)  -1 if password not correct
     int transfer_amount(int account_id, int amount); // return new balace by success
     int withdraw_amount(int account_id, int password, int amount); // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
-    int get_balance(int account_id, int password); // return account balance by success (correct password)  -1 if password not correct
+    int check_balance(int account_id, int password); // return account balance by success (correct password)  -1 if password not correct
 
 };
 
