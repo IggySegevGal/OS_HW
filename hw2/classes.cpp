@@ -164,6 +164,8 @@ extern fstream log_file;
       for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
         it->readers_writers_account.enter_reader();
       }
+      printf("\033[2J");
+      printf("\033[1;1H");
       //print first line:
       cout << "Current Bank Status" << endl;
       // print loop
