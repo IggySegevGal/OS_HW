@@ -200,7 +200,7 @@ extern fstream log_file;
     }
 
 
-    int accounts::deposite_amount(int account_id, int password, int amount){ // return balace by success (correct password)  -1 if password not correct
+    int accounts::deposite_amount(int account_id, int password, int amount ,int ATM_id){ // return balace by success (correct password)  -1 if password not correct
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
@@ -208,6 +208,7 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){
                 if (it->get_password() != password){
                     /*incorrect password - return;*/
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -217,13 +218,16 @@ extern fstream log_file;
                 it->readers_writers_account.enter_writer();
                 int curr_balance = it->get_balance();
                 it->set_balance(curr_balance + amount);
+                int new_balance = curr_balance + amount;
+                log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
                 sleep(1);
                 it->readers_writers_account.leave_writer();
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance + amount;
             }
         }
-         /*account not found - return;*/
+        /*account not found - return;*/
+        log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
@@ -309,7 +313,7 @@ extern fstream log_file;
     }
     
 
-    int accounts::withdraw_amount(int account_id, int password, int amount){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
+    int accounts::withdraw_amount(int account_id, int password, int amount , int ATM_id){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
@@ -317,6 +321,7 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){ 
                 if (it->get_password() != password){ 
                     /*incorrect password - return;*/
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -325,6 +330,7 @@ extern fstream log_file;
                 int curr_balance = it->get_balance();
                 /* check if there is enough balance - if not, return 1*/
                 if (amount > curr_balance) {
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<account_id <<" balance is lower than " << amount<< endl;
                     sleep(1);
                     it->readers_writers_account.leave_writer(); // leave writer from account
                     readers_writers_bank_accounts.leave_reader(); 
@@ -333,6 +339,7 @@ extern fstream log_file;
 
                 /*success:*/
                 it->set_balance(curr_balance - amount);
+                log_file << ATM_id<< ": Account "<< account_id << " new balance is " << (curr_balance - amount) << " after "<< amount<< " $ was withdrew"<< endl;
                 sleep(1);
                 it->readers_writers_account.leave_writer(); // leave writer from account
                 readers_writers_bank_accounts.leave_reader();
@@ -340,11 +347,12 @@ extern fstream log_file;
             }
         }
         /*account not found - return;*/
+        log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
-    int accounts::check_balance(int account_id, int password){ // return account balance by success (correct password)  -1 if password not correct
+    int accounts::check_balance(int account_id, int password , int ATM_id){ // return account balance by success (correct password)  -1 if password not correct
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
@@ -352,6 +360,7 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){
                 // wrong password - return 
                 if (it->get_password() != password){
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -359,13 +368,15 @@ extern fstream log_file;
                 /*success:*/
                 it->readers_writers_account.enter_reader(); // enter reader to account
                 int curr_balance = it->get_balance();
+                log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
                 sleep(1);
                 it->readers_writers_account.leave_reader(); // leave reader to account
                 readers_writers_bank_accounts.leave_reader();
                 return curr_balance;
             }
         }
-        // account not found: (not supposed to get here)
+        // account not found:
+        log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)

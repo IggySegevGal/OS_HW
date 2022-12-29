@@ -53,10 +53,10 @@ void  handle_command(string curr_command, thread_data_t * data){
     }
     //
     /*check if account exists - return error if not*/
-    if (!bank_account.account_exists(commend_arr[0]) && strcmp(letter.c_str(), "O") != 0) {
-        log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
-        return;
-    }
+    //if (!bank_account.account_exists(commend_arr[0]) && strcmp(letter.c_str(), "O") != 0) {
+    //    log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
+    //    return;
+    //}
 
     /*choose command*/
     if (!strcmp(letter.c_str(), "O")){
@@ -76,36 +76,17 @@ void  handle_command(string curr_command, thread_data_t * data){
         int account_id = commend_arr[0];
         int password = commend_arr[1];
         int amount = commend_arr[2];    
-        /*call deposite and check return value */
-        int new_balance = bank_account.deposite_amount(account_id,  password,  amount);
-        if (new_balance == -1){ // failed
-            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
-            return;
-        }
-        else { // success
-            log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
-        }
-       
+        /*call deposite */
+        bank_account.deposite_amount(account_id,  password,  amount, ATM_id);
     }
     else if (!strcmp(letter.c_str(), "W")){
     /*withdraw from account: W <account> <password> <amount>*/
         int account_id = commend_arr[0];
         int password = commend_arr[1];
         int amount = commend_arr[2];    
-        /*call  withdraw_amount and check return value */
-        int new_balance = bank_account.withdraw_amount(account_id,  password,  amount);
-        if (new_balance == -1){ // failed
-            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
-            return;
-        }
-        else if ( new_balance == -2 ){
-            log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<account_id <<" balance is lower than " << amount<< endl;
-            return;
-        }
-        else { // success
-            log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was withdrew"<< endl;
-        }
-        
+        /*call  withdraw_amount */
+        bank_account.withdraw_amount(account_id,  password,  amount, ATM_id);
+
     }
     else if (!strcmp(letter.c_str(), "B")){
     /*get balance B <account> <password>*/
@@ -113,15 +94,7 @@ void  handle_command(string curr_command, thread_data_t * data){
         int password = commend_arr[1];
         
         /*call check_balance and check return value */
-        int curr_balance = bank_account.check_balance(account_id, password);
-        if (curr_balance == -1){ // failed
-            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
-            return;
-        }
-        else { // success
-            log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
-        }
-        
+        bank_account.check_balance(account_id, password, ATM_id);
     }
     else if (!strcmp(letter.c_str(), "Q")){
     /*remove account: Q <account> <password>*/
