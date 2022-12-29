@@ -69,7 +69,7 @@ void  handle_command(string curr_command, thread_data_t * data){
         account new_account = account(account_id, password, initial_amount);
 
         /*try to insert account*/
-        bank_account.insert_account(new_account,ATM_id)
+        bank_account.insert_account(new_account,ATM_id);
     }
     else if (!strcmp(letter.c_str(), "D")){
     /*deposite to account: D <account> <password> <amount> */
@@ -149,18 +149,21 @@ void* ATM_routine(void* arg){
 
 /* commissions routine function
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
-//void* commisions_routine(void* arg){
+void* commisions_routine(void* arg){
     /*cast input to thread data*/
-//    thread_data_t *data= (thread_data_t *)arg;
+    thread_data_t *data= (thread_data_t *)arg;
     
-    /*every 3 seconds, do:
-    randomly select number between 1-5 %*/
+    /*every 3 seconds, do:*/
+    while(!all_treads_finished){
+        sleep(3);
+        /*call commission function*/
+        bank_account.take_commission();
 
-    /* for each account - remove ((int)(account_balace * rand_num / 100)) and add to bank balance*/
-    /* if (all_treads_finished) - global variable
-    pthread_exit(NULL);*/
-//return 0;
-//}
+    }
+    /* if (all_treads_finished) - global variable*/
+    pthread_exit(NULL);
+
+}
 
 /* print routine function
 responsible for printing every half a second*/

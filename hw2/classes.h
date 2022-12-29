@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <fstream>
+#include <cstdlib>
 using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.
@@ -91,7 +92,7 @@ class accounts {
     int transfer_amount(int src_account_id, int password, int target_account_id, int amount, int ATM_id); // return new balace by success
     int withdraw_amount(int account_id, int password, int amount, int ATM_id); // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
     int check_balance(int account_id, int password , int ATM_id); // return account balance by success (correct password)  -1 if password not correct
-    //void take_commission();
+    void take_commission();
 
 };
 
