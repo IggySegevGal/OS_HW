@@ -265,7 +265,7 @@ extern fstream log_file;
             return -3;
         }
         if(!target_exists){
-            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_exists <<" does not exist" << endl;
+            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_account_id <<" does not exist" << endl;
             /*account not found - return;*/
             sleep(1);
             readers_writers_bank_accounts.leave_reader();
