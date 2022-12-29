@@ -151,7 +151,7 @@ void* ATM_routine(void* arg){
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
 void* commisions_routine(void* arg){
     /*cast input to thread data*/
-    thread_data_t *data= (thread_data_t *)arg;
+    //thread_data_t *data= (thread_data_t *)arg;
     
     /*every 3 seconds, do:*/
     while(!all_treads_finished){
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     thread_data_t* atm_threads_data = new thread_data_t[files_num]; // ask lior about using new and initializing array with changing size
     
     // create commision thread 
-    //pthread_t commision_thread; 
+    pthread_t commision_thread; 
     //thread_data_t commision_thread_data;
 
     // create print thread 
@@ -229,10 +229,10 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     //commision_thread_data.file_name = ""; 
     
     /* create commision handler: (responsible to collects commision every 3 seconds) */
-    //if ((rc = pthread_create(&commision_thread, NULL, ???routin func commisiom??? , &commision_thread_data))) { //ask lior &
-    //        perror('Bank error: pthread_create failed');
-    //        return 1;
-    //}
+    if ((rc = pthread_create(&commision_thread, NULL, commisions_routine , NULL))) { //ask lior &
+            perror('Bank error: pthread_create failed');
+            return 1;
+    }
 
     /* init print_thread_data */
     //print_thread_data.thread_id = files_num+1; // last id + 1
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
 
     /*wait for print and commision threads to finish*/
     //pthread_join(print_thread, NULL);
-    //pthread_join(commision_thread, NULL);
+    pthread_join(commision_thread, NULL);
 
     /* close log txt file*/
     log_file.close();
