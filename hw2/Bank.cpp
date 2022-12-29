@@ -151,27 +151,8 @@ gets a command line and thread data struct and executes command*/
         int target_account_id = commend_arr[2];
         int amount = commend_arr[3];
 
-        /*check if target account exists*/
-        if (!bank_account.account_exists(target_account_id)) {
-            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_account_id <<" does not exist" << endl;
-            return;
-        }
-
-        /*withdraw amount from source account and check return value*/
-        int new_balance_src = bank_account.withdraw_amount(src_account_id,  password,  amount);
-        if (new_balance_src == -1){ // failed
-            log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<src_account_id <<" is incorrect" << endl;
-            return;
-        }
-        else if ( new_balance_src == -2 ){
-            log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<src_account_id <<" balance is lower than " << amount<< endl;
-            return;
-        }
         /*transfer amount to target account and check return value*/
-        int new_balance_target = bank_account.transfer_amount(target_account_id, amount);
-        log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<new_balance_src << " new target account balance is " << new_balance_target<< endl;
-
-        
+        int new_balance_target = bank_account.transfer_amount(src_account_id, password, target_account_id, amount, ATM_id);
     }
     else{
         // illegal command - maybe print something <3 -------------------------------------------------------------------------------
@@ -208,9 +189,9 @@ void* ATM_routine(void* arg){
 
 /* commissions routine function
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
-//void* commisions_routine(void* arg){
+void* commisions_routine(void* arg){
     /*cast input to thread data*/
-//    thread_data_t *data= (thread_data_t *)arg;
+    thread_data_t *data= (thread_data_t *)arg;
     
     /*every 3 seconds, do:
     randomly select number between 1-5 %*/
@@ -218,8 +199,8 @@ gets a pthread_data struct, and is responsible to collect commisions from each a
     /* for each account - remove ((int)(account_balace * rand_num / 100)) and add to bank balance*/
     /* if (all_treads_finished) - global variable
     pthread_exit(NULL);*/
-//return 0;
-//}
+return 0;
+}
 
 /* print routine function
 responsible for printing every half a second*/

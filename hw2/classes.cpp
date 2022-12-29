@@ -225,28 +225,84 @@
 
     }
 
-    int accounts::transfer_amount(int account_id, int amount){ // return balace or -1 if account not found
+    
+    int accounts::transfer_amount(int src_account_id, int password, int target_account_id, int amount, int ATM_id){ // return balace or -1 if incorrect password -2 if not enough balance,-3 if account not found
         // find account:
         vector<account>::iterator it;
-        readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
-        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
-            if(account_id == it->get_account_id()){// account_id doesn't change
-                /*success:*/
-                it->readers_writers_account.enter_writer();
-                int curr_balance = it->get_balance();
-                it->set_balance(curr_balance + amount);
-                sleep(1);
-                it->readers_writers_account.leave_writer();
-                readers_writers_bank_accounts.leave_reader();
-                return curr_balance + amount;
+        vector<account>::iterator it_src;
+        vector<account>::iterator it_target;
+        readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
+        // check if accounts exist
+        bool src_exists = false;
+        bool target_exists = false;
+        for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){ // find source account
+            if (src_account_id == it->get_account_id()){ 
+                if (it->get_password() != password){
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                    /*incorrect password - return;*/
+                    sleep(1);
+                    readers_writers_bank_accounts.leave_reader();
+                    return -1;
+                }
+                src_exists = true;
+                it_src = it;
+            } 
+            if (target_account_id == it->get_account_id()){ // find target account
+                target_exists = true;
+                it_target = it;
             }
         }
-        
-        /*account not found - return;*/
+        if(!src_exists){
+            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< src_account_id <<" does not exist" << endl;
+            /*account not found - return;*/
+            sleep(1);
+            readers_writers_bank_accounts.leave_reader();
+            return -3;
+        }
+        if(!target_exists){
+            log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_exists <<" does not exist" << endl;
+            /*account not found - return;*/
+            sleep(1);
+            readers_writers_bank_accounts.leave_reader();
+            return -3;
+        }
+
+        /*accounts exist and correct password - try to transfer money*/
+        // lock src and target accounts
+        it_src->readers_writers_account.enter_writer();
+        it_target->readers_writers_account.enter_writer();
+
+        // withdraw from source
+        int curr_balance = it_src->get_balance();
+        /* check if there is enough balance - if not, return 1*/
+        if (amount > curr_balance) {
+            log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<src_account_id <<" balance is lower than " << amount<< endl;
+            sleep(1);
+            // unlock src and target accounts
+            it_src->readers_writers_account.leave_writer();
+            it_target->readers_writers_account.leave_writer();
+            readers_writers_bank_accounts.leave_reader(); 
+            return -2;
+        }
+        it_src->set_balance(curr_balance - amount);
+        int src_balance = curr_balance - amount;
+
+        // transfer to target
+        curr_balance = it_target->get_balance();
+        it_target->set_balance(curr_balance + amount);
+        int target_balance = curr_balance + amount;
+
+        /*success:*/
+        log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<src_balance << " new target account balance is " << target_balance<< endl;
+
+        // unlock src and target accounts
         sleep(1);
+        it_src->readers_writers_account.leave_writer();
+        it_target->readers_writers_account.leave_writer();
         readers_writers_bank_accounts.leave_reader();
-        return -1; // maybe return -2 (account not found)
+        return target_balance; 
     }
+    
 
     int accounts::withdraw_amount(int account_id, int password, int amount){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
         // find account:
@@ -309,7 +365,10 @@
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
+    
+    void accounts::take_commission(){
 
+    }
 
 // ---------------------- readers writers class functions: -----------------------------------
         // constructor
