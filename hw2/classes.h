@@ -6,6 +6,7 @@
 #include <vector>
 #include <pthread.h>
 #include <unistd.h>
+#include <fstream>
 using namespace std;
 
 // create shared data structure to hold users accounts - when usind this structure please manage a "readers writers" routine.

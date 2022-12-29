@@ -152,7 +152,7 @@ gets a command line and thread data struct and executes command*/
         int amount = commend_arr[3];
 
         /*transfer amount to target account and check return value*/
-        int new_balance_target = bank_account.transfer_amount(src_account_id, password, target_account_id, amount, ATM_id);
+        bank_account.transfer_amount(src_account_id, password, target_account_id, amount, ATM_id);
     }
     else{
         // illegal command - maybe print something <3 -------------------------------------------------------------------------------
@@ -189,9 +189,9 @@ void* ATM_routine(void* arg){
 
 /* commissions routine function
 gets a pthread_data struct, and is responsible to collect commisions from each account*/
-void* commisions_routine(void* arg){
+//void* commisions_routine(void* arg){
     /*cast input to thread data*/
-    thread_data_t *data= (thread_data_t *)arg;
+//    thread_data_t *data= (thread_data_t *)arg;
     
     /*every 3 seconds, do:
     randomly select number between 1-5 %*/
@@ -199,8 +199,8 @@ void* commisions_routine(void* arg){
     /* for each account - remove ((int)(account_balace * rand_num / 100)) and add to bank balance*/
     /* if (all_treads_finished) - global variable
     pthread_exit(NULL);*/
-return 0;
-}
+//return 0;
+//}
 
 /* print routine function
 responsible for printing every half a second*/

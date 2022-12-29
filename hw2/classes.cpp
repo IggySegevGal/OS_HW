@@ -1,5 +1,5 @@
 #include "classes.h"
-
+extern fstream log_file;
 
 // ---------------------- account class functions: -----------------------------------
 	//constructors
@@ -238,7 +238,7 @@
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){ // find source account
             if (src_account_id == it->get_account_id()){ 
                 if (it->get_password() != password){
-                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                    log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<< src_account_id <<" is incorrect" << endl;
                     /*incorrect password - return;*/
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
@@ -366,9 +366,9 @@
         return -1; // maybe return -2 (account not found)
     }
     
-    void accounts::take_commission(){
+   // void accounts::take_commission(){
 
-    }
+    //}
 
 // ---------------------- readers writers class functions: -----------------------------------
         // constructor
