@@ -12,6 +12,7 @@ bool all_treads_finished;
 /* init global bank accounts */
 accounts bank_account;
 fstream log_file;
+pthread_mutex_t mutex_log; 
 
 /* handle_command function
 gets a command line and thread data struct and executes command*/
@@ -24,7 +25,7 @@ void  handle_command(string curr_command, thread_data_t * data){
 
     /*initialize string array to save the commend*/
     int commend_arr[4];
-    /*split commend by spaces*/
+    /*split command by spaces*/
     string delimiter = " ";
     int i = 0;
     int start = 0;
@@ -41,15 +42,15 @@ void  handle_command(string curr_command, thread_data_t * data){
         end = cpy_command.find(delimiter, start);
         }
         catch(...){
-            log_file << "Error "<< ATM_id << ": bad input ask lior" << endl;
-			return;
+            fprintf(stderr, "Bank error: illegal arguments\n");
+            exit(1);
         }
         i++;
     }
     try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
     catch(...){
-            log_file << "Error "<< ATM_id << ": bad input ask lior2" << endl;
-			return;
+        fprintf(stderr, "Bank error: illegal arguments\n");
+        exit(1);
     }
     //
     /*check if account exists - return error if not*/
@@ -190,6 +191,8 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
         fprintf(stderr, "Bank error: open failed"); /* ----------------------------------------------------------------check--------------------------------------------------------------------------*/
         exit(1);
     }
+    /*init log mutex*/
+    pthread_mutex_init(&mutex_log, NULL); 
 
     /*initialize finish flag to false*/
     all_treads_finished = false;
@@ -218,20 +221,20 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
         atm_threads_data[i].file_name = argv[i+1]; // ignore first argv - exe cmd // ask lior about [i] - dereference or pointer? 
         if ((rc = pthread_create(&atm_threads[i], NULL, ATM_routine , &atm_threads_data[i]))) {  // ask lior about &
             perror("Bank error: pthread_create failed");
-            return 1;
+            exit(1);
         }
     }
 
     /* create commision handler: (responsible to collects commision every 3 seconds) */
     if ((rc = pthread_create(&commision_thread, NULL, commisions_routine , NULL))) { //ask lior &
             perror("Bank error: pthread_create failed");
-            return 1;
+            exit(1);
     }
 
     /* create print handler: (responsible to collects commision every 3 seconds) */
     if ((rc = pthread_create(&print_thread, NULL, print_routine , NULL))) { //ask lior &
             perror("Bank error: pthread_create failed");
-            return 1;
+            exit(1);
     }
 
     /* block until all threads complete */
@@ -249,6 +252,7 @@ int main(int argc, char *argv[])  // responsible for initializing threads and ca
     /* close log txt file*/
     log_file.close();
 
+    pthread_mutex_destroy(&mutex_log); 
     delete[] atm_threads;
     delete[] atm_threads_data;
     return 0;

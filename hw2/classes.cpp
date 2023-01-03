@@ -1,5 +1,6 @@
 #include "classes.h"
 extern fstream log_file;
+extern pthread_mutex_t mutex_log;
 
 // ---------------------- account class functions: -----------------------------------
 	//constructors
@@ -88,7 +89,9 @@ extern fstream log_file;
 			for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
                 // account already exists - error and return:
 				if(new_account.get_account_id() == it->get_account_id()){
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - account with the same id exists" << endl;
+                    pthread_mutex_unlock(&mutex_log);
                     sleep(1);
                     readers_writers_bank_accounts.leave_writer();
 					return -1;
@@ -104,8 +107,9 @@ extern fstream log_file;
 				}
 			}
 		}
-        
+        pthread_mutex_lock(&mutex_log);
         log_file << ATM_id<< ": New account id is "<< new_account.get_account_id() << " with password " << new_account.get_password() << " and initial balance "<< new_account.get_balance()<< endl;
+        pthread_mutex_unlock(&mutex_log);
 		num_accounts = accounts_vector.size(); // update list size
         sleep(1);
         readers_writers_bank_accounts.leave_writer();
@@ -123,7 +127,9 @@ extern fstream log_file;
             
             // check if password is correct - if not return -1
             if (accounts_vector[i].get_password() != password) {
+                pthread_mutex_lock(&mutex_log);
                 log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                pthread_mutex_unlock(&mutex_log);
                 sleep(1);
                 readers_writers_bank_accounts.leave_writer();
                 return -1;
@@ -143,13 +149,17 @@ extern fstream log_file;
 				    max_account_id = accounts_vector.back().get_account_id();
 				}
 			 }
+             pthread_mutex_lock(&mutex_log);
              log_file << ATM_id<< ": Account "<< account_id << " is now closed. Balance was " << return_balance << endl;
+             pthread_mutex_unlock(&mutex_log);
              sleep(1);
              readers_writers_bank_accounts.leave_writer();
 	        return return_balance;
           }
       }
+      pthread_mutex_lock(&mutex_log);
       log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
+      pthread_mutex_unlock(&mutex_log);
       /*account not found - return:*/
       readers_writers_bank_accounts.leave_writer();
       sleep(1);
@@ -210,7 +220,9 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){
                 if (it->get_password() != password){
                     /*incorrect password - return;*/
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                    pthread_mutex_unlock(&mutex_log);
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -221,7 +233,9 @@ extern fstream log_file;
                 int curr_balance = it->get_balance();
                 it->set_balance(curr_balance + amount);
                 int new_balance = curr_balance + amount;
+                pthread_mutex_lock(&mutex_log);
                 log_file << ATM_id<< ": Account "<< account_id << " new balance is " << new_balance << " after "<< amount<< " $ was deposited"<< endl;
+                pthread_mutex_unlock(&mutex_log);
                 sleep(1);
                 it->readers_writers_account.leave_writer();
                 readers_writers_bank_accounts.leave_reader();
@@ -229,7 +243,9 @@ extern fstream log_file;
             }
         }
         /*account not found - return;*/
+        pthread_mutex_lock(&mutex_log);
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
+        pthread_mutex_unlock(&mutex_log);
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
@@ -249,7 +265,9 @@ extern fstream log_file;
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){ // find source account
             if (src_account_id == it->get_account_id()){ 
                 if (it->get_password() != password){
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<< src_account_id <<" is incorrect" << endl;
+                    pthread_mutex_unlock(&mutex_log);
                     /*incorrect password - return;*/
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
@@ -264,14 +282,18 @@ extern fstream log_file;
             }
         }
         if(!src_exists){
+            pthread_mutex_lock(&mutex_log);
             log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< src_account_id <<" does not exist" << endl;
+            pthread_mutex_unlock(&mutex_log);
             /*account not found - return;*/
             sleep(1);
             readers_writers_bank_accounts.leave_reader();
             return -3;
         }
         if(!target_exists){
+            pthread_mutex_lock(&mutex_log);
             log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< target_account_id <<" does not exist" << endl;
+            pthread_mutex_unlock(&mutex_log);
             /*account not found - return;*/
             sleep(1);
             readers_writers_bank_accounts.leave_reader();
@@ -287,7 +309,9 @@ extern fstream log_file;
         int curr_balance = it_src->get_balance();
         /* check if there is enough balance - if not, return 1*/
         if (amount > curr_balance) {
+            pthread_mutex_lock(&mutex_log);
             log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<src_account_id <<" balance is lower than " << amount<< endl;
+            pthread_mutex_unlock(&mutex_log);
             sleep(1);
             // unlock src and target accounts
             it_src->readers_writers_account.leave_writer();
@@ -304,7 +328,9 @@ extern fstream log_file;
         int target_balance = curr_balance + amount;
 
         /*success:*/
+        pthread_mutex_lock(&mutex_log);
         log_file << ATM_id << ": Transfer " << amount<< " from account " << src_account_id << " to account " << target_account_id << " new account balance is " <<src_balance << " new target account balance is " << target_balance<< endl;
+        pthread_mutex_unlock(&mutex_log);
 
         // unlock src and target accounts
         sleep(1);
@@ -323,7 +349,9 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){ 
                 if (it->get_password() != password){ 
                     /*incorrect password - return;*/
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                    pthread_mutex_unlock(&mutex_log);
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -332,7 +360,9 @@ extern fstream log_file;
                 int curr_balance = it->get_balance();
                 /* check if there is enough balance - if not, return 1*/
                 if (amount > curr_balance) {
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - account id "<<account_id <<" balance is lower than " << amount<< endl;
+                    pthread_mutex_unlock(&mutex_log);
                     sleep(1);
                     it->readers_writers_account.leave_writer(); // leave writer from account
                     readers_writers_bank_accounts.leave_reader(); 
@@ -341,7 +371,9 @@ extern fstream log_file;
 
                 /*success:*/
                 it->set_balance(curr_balance - amount);
+                pthread_mutex_lock(&mutex_log);
                 log_file << ATM_id<< ": Account "<< account_id << " new balance is " << (curr_balance - amount) << " after "<< amount<< " $ was withdrew"<< endl;
+                pthread_mutex_unlock(&mutex_log);
                 sleep(1);
                 it->readers_writers_account.leave_writer(); // leave writer from account
                 readers_writers_bank_accounts.leave_reader();
@@ -349,7 +381,9 @@ extern fstream log_file;
             }
         }
         /*account not found - return;*/
+        pthread_mutex_lock(&mutex_log);
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
+        pthread_mutex_unlock(&mutex_log);
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
@@ -362,7 +396,9 @@ extern fstream log_file;
             if(account_id == it->get_account_id()){
                 // wrong password - return 
                 if (it->get_password() != password){
+                    pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
+                    pthread_mutex_unlock(&mutex_log);
                     sleep(1);
                     readers_writers_bank_accounts.leave_reader();
                     return -1;
@@ -370,7 +406,9 @@ extern fstream log_file;
                 /*success:*/
                 it->readers_writers_account.enter_reader(); // enter reader to account
                 int curr_balance = it->get_balance();
+                pthread_mutex_lock(&mutex_log);
                 log_file << ATM_id<< ": Account "<< account_id << " balance is " << curr_balance << endl;
+                pthread_mutex_unlock(&mutex_log);
                 sleep(1);
                 it->readers_writers_account.leave_reader(); // leave reader to account
                 readers_writers_bank_accounts.leave_reader();
@@ -378,16 +416,17 @@ extern fstream log_file;
             }
         }
         // account not found:
+        pthread_mutex_lock(&mutex_log);
         log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< account_id <<" does not exist" << endl;
+        pthread_mutex_unlock(&mutex_log);
         sleep(1);
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
     
     void accounts::take_commission(){
-
         vector<account>::iterator it;
-	int commission_toremove = 0;
+	    int commission_toremove = 0;
         int curr_balance = 0;
         /*randomly select number between 1-5*/
         int lb = 1, ub = 5;/*lower bound and upper bound*/
@@ -405,7 +444,9 @@ extern fstream log_file;
             bank_balance += commission_toremove;
 
             /*print message to log*/
+            pthread_mutex_lock(&mutex_log);
             log_file << "Bank: commissions of "<< rand_num <<" % were charged, the bank gained " <<commission_toremove<< " $ from account "<< it->get_account_id() << endl;
+            pthread_mutex_unlock(&mutex_log);
         }
         /*unlock the bank accounts*/
         readers_writers_bank_accounts.leave_writer();
