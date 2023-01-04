@@ -35,7 +35,7 @@ void  handle_command(string curr_command, thread_data_t * data){
     start = end + delimiter.size();
     end = cpy_command.find(delimiter, start);
     /*get account:*/
-    commend_arr[i] = stoi(cpy_command.substr(start, end - start));
+    commend_arr[0] = stoi(cpy_command.substr(start, end - start));
     start = end + delimiter.size();
     end = cpy_command.find(delimiter, start);
     i++;
@@ -43,8 +43,10 @@ void  handle_command(string curr_command, thread_data_t * data){
     string password = cpy_command.substr(start, end - start);
     start = end + delimiter.size();
     end = cpy_command.find(delimiter, start);
+    bool enter_while = false;
     /*get other numbers from input command*/
     while (end != -1) {
+        enter_while = true;
         try{ commend_arr[i] = stoi(cpy_command.substr(start, end - start));
         start = end + delimiter.size();
         end = cpy_command.find(delimiter, start);
@@ -55,10 +57,12 @@ void  handle_command(string curr_command, thread_data_t * data){
         }
         i++;
     }
-    try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
-    catch(...){
-        fprintf(stderr, "Bank error: illegal arguments\n");
-        exit(1);
+    if(enter_while){
+        try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
+        catch(...){
+            fprintf(stderr, "Bank error: illegal arguments\n");
+            exit(1);
+        }
     }
 
     /*choose command*/
