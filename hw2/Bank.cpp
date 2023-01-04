@@ -20,12 +20,14 @@ void  handle_command(string curr_command, thread_data_t * data){
     /*ATM ID number*/
     int ATM_id = data->thread_id;
 
+    string command = curr_command;
+
     /*split command by spaces*/
-    istringstream iss(curr_command);
+    std::istringstream iss(command);
     vector<string> args;
 
-    while (std::getline(iss, curr_command, ' ')){
-        args.push_back(curr_command);
+    while (getline(iss, command, ' ')){
+        args.push_back(command);
     }
 
     if(args.size() < 3){
