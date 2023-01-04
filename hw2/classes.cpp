@@ -126,7 +126,7 @@ extern pthread_mutex_t mutex_log;
           if (accounts_vector[i].get_account_id() == account_id){
             
             // check if password is correct - if not return -1
-            if (strcmp(accounts_vector[i].get_password(),password) != 0) {
+            if (strcmp(accounts_vector[i].get_password().c_str(),password) != 0) {
                 pthread_mutex_lock(&mutex_log);
                 log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                 pthread_mutex_unlock(&mutex_log);
@@ -218,7 +218,7 @@ extern pthread_mutex_t mutex_log;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){
-                if (strcmp(it->get_password(),password) != 0){
+                if (strcmp(it->get_password().c_str(),password) != 0){
                     /*incorrect password - return;*/
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
@@ -264,7 +264,7 @@ extern pthread_mutex_t mutex_log;
         bool target_exists = false;
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){ // find source account
             if (src_account_id == it->get_account_id()){ 
-                if (strcmp(it->get_password(),password) != 0){
+                if (strcmp(it->get_password().c_str(),password) != 0){
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<< src_account_id <<" is incorrect" << endl;
                     pthread_mutex_unlock(&mutex_log);
@@ -347,7 +347,7 @@ extern pthread_mutex_t mutex_log;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){ 
-                if (strcmp(it->get_password(),password) != 0){ 
+                if (strcmp(it->get_password().c_str(),password) != 0){ 
                     /*incorrect password - return;*/
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
@@ -395,7 +395,7 @@ extern pthread_mutex_t mutex_log;
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){
                 // wrong password - return 
-                if (strcmp(it->get_password(),password) != 0){
+                if (strcmp(it->get_password().c_str(),password) != 0){
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                     pthread_mutex_unlock(&mutex_log);
