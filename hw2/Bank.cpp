@@ -32,7 +32,15 @@ void  handle_command(string curr_command, thread_data_t * data){
     int end = cpy_command.find(delimiter);
     /*get letter command:*/
     string letter = cpy_command.substr(start, end - start);
-    //
+    start = end + delimiter.size();
+    end = cpy_command.find(delimiter, start);
+    /*get account:*/
+    commend_arr[i] = stoi(cpy_command.substr(start, end - start));
+    start = end + delimiter.size();
+    end = cpy_command.find(delimiter, start);
+    i++;
+    /*get password:*/
+    string password = cpy_command.substr(start, end - start);
     start = end + delimiter.size();
     end = cpy_command.find(delimiter, start);
     /*get other numbers from input command*/
@@ -52,19 +60,12 @@ void  handle_command(string curr_command, thread_data_t * data){
         fprintf(stderr, "Bank error: illegal arguments\n");
         exit(1);
     }
-    //
-    /*check if account exists - return error if not*/
-    //if (!bank_account.account_exists(commend_arr[0]) && strcmp(letter.c_str(), "O") != 0) {
-    //    log_file << "Error "<< ATM_id <<": Your transaction failed - account id "<< commend_arr[0] <<" does not exist" << endl;
-    //    return;
-    //}
 
     /*choose command*/
     if (!strcmp(letter.c_str(), "O")){
     /*open account: O <account> <password> <initial_amount> */
         int account_id = commend_arr[0];
-        int password = commend_arr[1];
-        int initial_amount = commend_arr[2];
+        int initial_amount = commend_arr[1];
 
         /*create new account */
         account new_account = account(account_id, password, initial_amount);
@@ -75,16 +76,14 @@ void  handle_command(string curr_command, thread_data_t * data){
     else if (!strcmp(letter.c_str(), "D")){
     /*deposite to account: D <account> <password> <amount> */
         int account_id = commend_arr[0];
-        int password = commend_arr[1];
-        int amount = commend_arr[2];    
+        int amount = commend_arr[1];    
         /*call deposite */
         bank_account.deposite_amount(account_id,  password,  amount, ATM_id);
     }
     else if (!strcmp(letter.c_str(), "W")){
     /*withdraw from account: W <account> <password> <amount>*/
         int account_id = commend_arr[0];
-        int password = commend_arr[1];
-        int amount = commend_arr[2];    
+        int amount = commend_arr[1];    
         /*call  withdraw_amount */
         bank_account.withdraw_amount(account_id,  password,  amount, ATM_id);
 
@@ -92,7 +91,6 @@ void  handle_command(string curr_command, thread_data_t * data){
     else if (!strcmp(letter.c_str(), "B")){
     /*get balance B <account> <password>*/
         int account_id = commend_arr[0];
-        int password = commend_arr[1];
         
         /*call check_balance and check return value */
         bank_account.check_balance(account_id, password, ATM_id);
@@ -100,7 +98,6 @@ void  handle_command(string curr_command, thread_data_t * data){
     else if (!strcmp(letter.c_str(), "Q")){
     /*remove account: Q <account> <password>*/
         int account_id = commend_arr[0];
-        int password = commend_arr[1];
         
         /*call remove_account and check return value */
         bank_account.remove_account(account_id, password,ATM_id);
@@ -108,9 +105,8 @@ void  handle_command(string curr_command, thread_data_t * data){
     else if (!strcmp(letter.c_str(), "T")){
     /*transfer money to target account: T <account> <password> <target_account> <amount>*/
         int src_account_id = commend_arr[0];
-        int password = commend_arr[1];
-        int target_account_id = commend_arr[2];
-        int amount = commend_arr[3];
+        int target_account_id = commend_arr[1];
+        int amount = commend_arr[2];
 
         /*transfer amount to target account and check return value*/
         bank_account.transfer_amount(src_account_id, password, target_account_id, amount, ATM_id);

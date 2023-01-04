@@ -4,7 +4,7 @@ extern pthread_mutex_t mutex_log;
 
 // ---------------------- account class functions: -----------------------------------
 	//constructors
-	account::account(int account_id,int password,int balance) { 
+	account::account(int account_id, string password,int balance) { 
 		this->account_id = account_id;
 		this->password = password;
 		this->balance = balance;
@@ -21,9 +21,9 @@ extern pthread_mutex_t mutex_log;
         //readers_writers_account.leave_reader();
         return rt;
     }
-    int account::get_password(){
+    string account::get_password(){
         //readers_writers_account.enter_reader();
-        int rt = password;
+        string rt = password;
         //readers_writers_account.leave_reader();
         return rt;
     }
@@ -39,7 +39,7 @@ extern pthread_mutex_t mutex_log;
         this->account_id = new_account_id;
         //readers_writers_account.leave_writer();
     }
-    void account::set_password(int new_password){
+    void account::set_password(string new_password){
         //readers_writers_account.enter_writer();
         this->password = new_password;
         //readers_writers_account.leave_writer();
@@ -117,7 +117,7 @@ extern pthread_mutex_t mutex_log;
 
     }
 
-    int accounts::remove_account(int account_id, int password,int ATM_id) { // return 0 by success and -2 if object was not found or -1 if password was not correct
+    int accounts::remove_account(int account_id, string password,int ATM_id) { // return 0 by success and -2 if object was not found or -1 if password was not correct
     /*-------ask lior------*/
       readers_writers_bank_accounts.enter_writer();
       vector<account>::iterator it;
@@ -126,7 +126,7 @@ extern pthread_mutex_t mutex_log;
           if (accounts_vector[i].get_account_id() == account_id){
             
             // check if password is correct - if not return -1
-            if (accounts_vector[i].get_password() != password) {
+            if (strcmp(accounts_vector[i].get_password(),password) != 0) {
                 pthread_mutex_lock(&mutex_log);
                 log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                 pthread_mutex_unlock(&mutex_log);
@@ -212,13 +212,13 @@ extern pthread_mutex_t mutex_log;
     }
 
 
-    int accounts::deposite_amount(int account_id, int password, int amount ,int ATM_id){ // return balace by success (correct password)  -1 if password not correct
+    int accounts::deposite_amount(int account_id, string password, int amount ,int ATM_id){ // return balace by success (correct password)  -1 if password not correct
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){
-                if (it->get_password() != password){
+                if (strcmp(it->get_password(),password) != 0){
                     /*incorrect password - return;*/
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
@@ -253,7 +253,7 @@ extern pthread_mutex_t mutex_log;
     }
 
     
-    int accounts::transfer_amount(int src_account_id, int password, int target_account_id, int amount, int ATM_id){ // return balace or -1 if incorrect password -2 if not enough balance,-3 if account not found
+    int accounts::transfer_amount(int src_account_id, string password, int target_account_id, int amount, int ATM_id){ // return balace or -1 if incorrect password -2 if not enough balance,-3 if account not found
         // find account:
         vector<account>::iterator it;
         vector<account>::iterator it_src;
@@ -264,7 +264,7 @@ extern pthread_mutex_t mutex_log;
         bool target_exists = false;
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){ // find source account
             if (src_account_id == it->get_account_id()){ 
-                if (it->get_password() != password){
+                if (strcmp(it->get_password(),password) != 0){
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<< src_account_id <<" is incorrect" << endl;
                     pthread_mutex_unlock(&mutex_log);
@@ -341,13 +341,13 @@ extern pthread_mutex_t mutex_log;
     }
     
 
-    int accounts::withdraw_amount(int account_id, int password, int amount , int ATM_id){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
+    int accounts::withdraw_amount(int account_id, string password, int amount , int ATM_id){ // subtract amount to account, if enough balance and correct password return balace , if not enough balance return -2 , if password not correct return -1
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){ 
-                if (it->get_password() != password){ 
+                if (strcmp(it->get_password(),password) != 0){ 
                     /*incorrect password - return;*/
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
@@ -388,14 +388,14 @@ extern pthread_mutex_t mutex_log;
         readers_writers_bank_accounts.leave_reader();
         return -1; // maybe return -2 (account not found)
     }
-    int accounts::check_balance(int account_id, int password , int ATM_id){ // return account balance by success (correct password)  -1 if password not correct
+    int accounts::check_balance(int account_id, string password , int ATM_id){ // return account balance by success (correct password)  -1 if password not correct
         // find account:
         vector<account>::iterator it;
         readers_writers_bank_accounts.enter_reader(); // this func doesn't change bank accounts members - only reads
         for (it = accounts_vector.begin() ; it != accounts_vector.end(); ++it){
             if(account_id == it->get_account_id()){
                 // wrong password - return 
-                if (it->get_password() != password){
+                if (strcmp(it->get_password(),password) != 0){
                     pthread_mutex_lock(&mutex_log);
                     log_file << "Error "<< ATM_id << ": Your transaction failed - password for account id "<<account_id <<" is incorrect" << endl;
                     pthread_mutex_unlock(&mutex_log);
