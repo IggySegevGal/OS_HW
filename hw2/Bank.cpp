@@ -20,56 +20,28 @@ void  handle_command(string curr_command, thread_data_t * data){
     /*ATM ID number*/
     int ATM_id = data->thread_id;
 
-    /*create a copy of curr commend to erase by token*/
-    string cpy_command = curr_command;
-
-    /*initialize string array to save the commend*/
-    int commend_arr[4];
     /*split command by spaces*/
-    string delimiter = " ";
-    int i = 0;
-    int start = 0;
-    int end = cpy_command.find(delimiter);
-    /*get letter command:*/
-    string letter = cpy_command.substr(start, end - start);
-    start = end + delimiter.size();
-    end = cpy_command.find(delimiter, start);
-    /*get account:*/
-    commend_arr[0] = stoi(cpy_command.substr(start, end - start));
-    start = end + delimiter.size();
-    end = cpy_command.find(delimiter, start);
-    i++;
-    /*get password:*/
-    string password = cpy_command.substr(start, end - start);
-    start = end + delimiter.size();
-    end = cpy_command.find(delimiter, start);
-    bool enter_while = false;
-    /*get other numbers from input command*/
-    while (end != -1) {
-        enter_while = true;
-        try{ commend_arr[i] = stoi(cpy_command.substr(start, end - start));
-        start = end + delimiter.size();
-        end = cpy_command.find(delimiter, start);
-        }
-        catch(...){
-            fprintf(stderr, "Bank error: illegal arguments\n");
-            exit(1);
-        }
-        i++;
+    string delimiter = ' ';
+    istringstream iss(curr_command);
+    vector<string> args;
+
+    while (std::getline(iss, curr_command, delimiter)){
+        args.push_back(curr_command);
     }
-    if(enter_while){
-        try{commend_arr[i] = stoi(cpy_command.substr(start, end - start));} //last argument
-        catch(...){
-            fprintf(stderr, "Bank error: illegal arguments\n");
-            exit(1);
-        }
-    }
+
+    if(args.size() < 3){
+        fprintf(stderr, "Bank error: illegal arguments\n");
+        exit(1);
+    }    
+
+    string letter = args[0];
+    int account_id = stoi(args[1]);
+    string password = args[2];
 
     /*choose command*/
     if (!strcmp(letter.c_str(), "O")){
     /*open account: O <account> <password> <initial_amount> */
-        int account_id = commend_arr[0];
-        int initial_amount = commend_arr[1];
+        int initial_amount = stoi(args[3]);
 
         /*create new account */
         account new_account = account(account_id, password, initial_amount);
@@ -79,41 +51,37 @@ void  handle_command(string curr_command, thread_data_t * data){
     }
     else if (!strcmp(letter.c_str(), "D")){
     /*deposite to account: D <account> <password> <amount> */
-        int account_id = commend_arr[0];
-        int amount = commend_arr[1];    
+        int amount = stoi(args[3]);
+
         /*call deposite */
         bank_account.deposite_amount(account_id,  password,  amount, ATM_id);
     }
     else if (!strcmp(letter.c_str(), "W")){
     /*withdraw from account: W <account> <password> <amount>*/
-        int account_id = commend_arr[0];
-        int amount = commend_arr[1];    
+        int amount = stoi(args[3]);   
         /*call  withdraw_amount */
         bank_account.withdraw_amount(account_id,  password,  amount, ATM_id);
 
     }
     else if (!strcmp(letter.c_str(), "B")){
     /*get balance B <account> <password>*/
-        int account_id = commend_arr[0];
-        
+
         /*call check_balance and check return value */
         bank_account.check_balance(account_id, password, ATM_id);
     }
     else if (!strcmp(letter.c_str(), "Q")){
     /*remove account: Q <account> <password>*/
-        int account_id = commend_arr[0];
-        
+
         /*call remove_account and check return value */
         bank_account.remove_account(account_id, password,ATM_id);
     }
     else if (!strcmp(letter.c_str(), "T")){
     /*transfer money to target account: T <account> <password> <target_account> <amount>*/
-        int src_account_id = commend_arr[0];
-        int target_account_id = commend_arr[1];
-        int amount = commend_arr[2];
+        int target_account_id = stoi(args[3]);
+        int amount = stoi(args[4]);
 
         /*transfer amount to target account and check return value*/
-        bank_account.transfer_amount(src_account_id, password, target_account_id, amount, ATM_id);
+        bank_account.transfer_amount(account_id, password, target_account_id, amount, ATM_id);
     }
     else{
         // illegal command - maybe print something <3 -------------------------------------------------------------------------------
