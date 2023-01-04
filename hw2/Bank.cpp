@@ -23,7 +23,7 @@ void  handle_command(string curr_command, thread_data_t * data){
     string command = curr_command;
 
     /*split command by spaces*/
-    std::istringstream iss(command);
+    std::istringstream iss(command,istringstream:in);
     vector<string> args;
 
     while (getline(iss, command, ' ')){
