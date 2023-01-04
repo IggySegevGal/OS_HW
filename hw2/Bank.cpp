@@ -21,11 +21,10 @@ void  handle_command(string curr_command, thread_data_t * data){
     int ATM_id = data->thread_id;
 
     /*split command by spaces*/
-    string delimiter = ' ';
     istringstream iss(curr_command);
     vector<string> args;
 
-    while (std::getline(iss, curr_command, delimiter)){
+    while (std::getline(iss, curr_command, ' ')){
         args.push_back(curr_command);
     }
 
