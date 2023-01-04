@@ -5,6 +5,7 @@
 #include <fstream>
 #include <pthread.h>
 #include "classes.h"
+#include <sstream>
 using namespace std;
 
 /*globals*/
@@ -23,7 +24,7 @@ void  handle_command(string curr_command, thread_data_t * data){
     string command = curr_command;
 
     /*split command by spaces*/
-    std::istringstream iss(command,istringstream:in);
+    std::istringstream iss(command);
     vector<string> args;
 
     while (getline(iss, command, ' ')){
