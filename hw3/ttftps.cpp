@@ -46,7 +46,8 @@ void send_error_pck(struct sockaddr_in curr_client_addr, int sockfd, int error_c
     struct error_pck pck;
     pck.error_code = htons(error_code);
     pck.opcode = htons(OPCODE_ERROR);
-    strcpy(pck.msg, msg.c_str());
+    strcpy(pck.msg, error_msg.c_str());
+    cout << "hey sis, you have an error " << error_msg << endl;
 	
     /* send to client and check success */
     ssize_t send_num = sendto(sockfd, &pck, sizeof(pck), 0 ,(struct sockaddr *) &curr_client_addr, sizeof(curr_client_addr));
@@ -141,7 +142,7 @@ const short OCTET_STRING_SIZE = 6;
     struct sockaddr_in new_client_addr;
     memset(&new_client_addr, 0, sizeof(new_client_addr));
     socklen_t addr_length = sizeof(struct sockaddr_in);
-	
+	string  error_msg;
 
     while(1) {
 
