@@ -47,7 +47,7 @@ void send_error_pck(struct sockaddr_in curr_client_addr, int sockfd, int error_c
     pck.error_code = htons(error_code);
     pck.opcode = htons(OPCODE_ERROR);
     strcpy(pck.msg, error_msg.c_str());
-    cout << "hey sis, you have an error " << error_msg << endl;
+    //cout << "hey sis, you have an error " << error_msg << endl;
 	
     /* send to client and check success */
     ssize_t send_num = sendto(sockfd, &pck, sizeof(pck), 0 ,(struct sockaddr *) &curr_client_addr, sizeof(curr_client_addr));
@@ -199,6 +199,8 @@ const short OCTET_STRING_SIZE = 6;
 				continue;
 			}
 
+		/* send ack */
+           	 send_ack_pck(curr_client_addr, curr_block, sockfd);
             /* reset timeout: */
             FD_ZERO(&rfds);
             FD_SET(sockfd, &rfds);
@@ -295,6 +297,11 @@ const short OCTET_STRING_SIZE = 6;
 				if(curr_data.block_number != curr_block) {
                     error_msg = "Bad block number";
                     send_error_pck(curr_client_addr, sockfd, 0, error_msg);
+			/* severe error - remove file */
+		            if(!(remove(file_name) == 0)){
+		                perror("TTFTP_ERROR:");
+		                exit(1);
+		            }
 					continue;
 				}
 
