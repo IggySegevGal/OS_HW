@@ -17,24 +17,28 @@ using namespace std;
 #define OPCODE_DATA 3
 #define OPCODE_ACK 4
 #define OPCODE_ERROR 5
+#define MAX_MSG 100
+
 
 /* packets structs */
-struct data_pck_struct{
+struct data_pck{
     short opcode;
     short block_number;
     char data[DATA_PCK_LEN - DATA_HEADER_LEN];
 } __attribute__((packed));
 
-struct ack_pck_struct{ 
+struct ack_pck{ 
     short opcode;
     short block_number;
 } __attribute__((packed));
 
-struct error_pck_struct{
+struct error_pck{
     short opcode;
     short error_code;
-    string error_str;
+    char msg[MAX_MSG];
 } __attribute__((packed));
+
+
 
 
 #endif

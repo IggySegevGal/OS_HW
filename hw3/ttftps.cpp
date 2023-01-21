@@ -1,5 +1,5 @@
 /* defines: */ 
-#define DATAMAX 512 /* Longest string to echo */
+#define DATAMAX 512
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -8,12 +8,53 @@
 #include <climits>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <cstring>
+#include "classes.h"
 #define SYS_CALL_FAIL_MSG "TTFTP_ERROR"
 #define NUM_ARG 4
+#define DATA_PCK_LEN 516
 
-void error_func(char *msg) {
-    perror(msg);
-    exit(1);
+
+
+using namespace std;
+
+//void error_func() {
+//    perror("TTFTP_ERROR:");
+//    exit(1);
+//}
+
+
+void send_ack_pck(struct sockaddr_in curr_client_addr , short curr_block, int sockfd){
+    
+    /* create packet */
+    struct ack_pck pck;
+    pck.block_number = htons(curr_block);
+    pck.opcode = htons(OPCODE_ACK);
+    
+    /* send to client and check success */
+    ssize_t send_num = sendto(sockfd, &pck, sizeof(struct ack_pck), 0 ,(struct sockaddr *) &curr_client_addr, sizeof(curr_client_addr));
+	if(send_num != sizeof(pck)){
+        return;
+    }
+    return;
+}
+
+void send_error_pck(struct sockaddr_in curr_client_addr, int sockfd, int error_code, string error_msg){
+    
+    /* create packet */
+    struct error_pck pck;
+    pck.error_code = htons(error_code);
+    pck.opcode = htons(OPCODE_ERROR);
+    strcpy(pck.msg, msg.c_str());
+	
+    /* send to client and check success */
+    ssize_t send_num = sendto(sockfd, &pck, sizeof(pck), 0 ,(struct sockaddr *) &curr_client_addr, sizeof(curr_client_addr));
+    if(send_num != sizeof(pck)){ /* syscall error, exit */
+        perror("TTFTP_ERROR:");
+        exit(1);
+    }
+    return;
 }
 
 /*struct sockaddr_in {
@@ -24,6 +65,7 @@ void error_func(char *msg) {
 } */
 
 int main(int argc, char *argv[]) {
+const short OCTET_STRING_SIZE = 6;
 
     /* check num args */
     if (argc != NUM_ARG) {
@@ -58,7 +100,8 @@ int main(int argc, char *argv[]) {
     /* create UDP socket*/
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0){
-        error_func(SYS_CALL_FAIL_MSG);
+    	perror("TTFTP_ERROR:");
+    	exit(1);
     }
 
     struct sockaddr_in ServAddr; /* Local address */
@@ -69,17 +112,18 @@ int main(int argc, char *argv[]) {
 
     /* bind socket to ServPort*/
     if (bind(sockfd, (struct sockaddr*) &ServAddr,sizeof(ServAddr)) < 0){
-        error_func(SYS_CALL_FAIL_MSG);
+    	perror("TTFTP_ERROR:");
+    	exit(1);
     }
 
     /* initialize variables for while loop */
-    string file_name;
+    char file_name[DATA_PCK_LEN - sizeof(short)]; //CHECKKKKKKKK
     ofstream outputfile;
     short curr_opcode = 0;
     short curr_block = 0;
     bool server_busy = false;
     int timeout_counter = 0;
-    int rec_bytes = 0;
+    //int rec_bytes = 0;
     char buffer[DATA_PCK_LEN] = {0};
     /* select function variables */
     fd_set rfds;
@@ -114,7 +158,8 @@ int main(int argc, char *argv[]) {
             
         /* check select retval: */
         if (retval_select < 0) {
-            error_func(SYS_CALL_FAIL_MSG);
+		perror("TTFTP_ERROR:");
+		exit(1);
         }
 
 
@@ -127,18 +172,20 @@ int main(int argc, char *argv[]) {
             /* check timeout counter limit */
             if (timeout_counter >= max_num_of_resends) {
                 /* timeout limit exceeded - send error msg to client */
-				send_error(curr_client_addr, 0, "Abandoning file transmission", sockfd);
+                error_msg = "Abandoning file transmission";
+                send_error_pck(curr_client_addr, sockfd, 0, error_msg);
 				
                 /* remove file */
                 if(!(remove(file_name) == 0)){
-					error_func(SYS_CALL_FAIL_MSG);
+                perror("TTFTP_ERROR:");
+                exit(1);
 				}
                 
                 /* reset connection */
                 timeout_counter = 0;
                 curr_block = 0;
                 server_busy = false;
-                memset(&client_addr, 0, sizeof(client_addr));
+                memset(&curr_client_addr, 0, sizeof(curr_client_addr)); // change from client to curr_client
                 memset(&buffer, 0, sizeof(buffer));
                 
                 /* reset timeout: */
@@ -147,7 +194,7 @@ int main(int argc, char *argv[]) {
                 /* Wait up to timeout seconds. */
                 tv.tv_sec = timeout;
                 tv.tv_usec = 0;
-                file.close();
+                outputfile.close(); 
 				continue;
 			}
 
@@ -161,18 +208,25 @@ int main(int argc, char *argv[]) {
         }
 
         /* handle packet */
+	int rec_msg_size = 0;
         if (( retval_select > 0 && FD_ISSET(sockfd, &rfds))) {
             rec_msg_size = recvfrom(sockfd, (void*)&buffer, sizeof(buffer), 0,
                 (struct sockaddr *)&new_client_addr, &addr_length);
 
             /* check msg size */
             if (rec_msg_size < 0) {
-                error_func(SYS_CALL_FAIL_MSG);
+            	perror("TTFTP_ERROR:");
+    		exit(1);
             }
 	
-            /* check if new client == curr client, if not - error */ 
-            if (server_busy && !sockaddr_equal(curr_client_addr,new_client_addr)) {
-                send_error(new_client_addr, 4, "Unexpected packet", sockfd);
+           /* check if new client == curr client, if not - error */ 
+            bool is_equal = false;
+            if (curr_client_addr.sin_addr.s_addr == new_client_addr.sin_addr.s_addr && curr_client_addr.sin_port == new_client_addr.sin_port){
+                    is_equal = true;
+                }
+            if (server_busy && !is_equal) {
+                error_msg = "Unexpected packet";
+                send_error_pck(new_client_addr, sockfd, 4, error_msg);
 				continue;
 			}
 			
@@ -186,7 +240,8 @@ int main(int argc, char *argv[]) {
                 
                 /* if server is busy, send error msg 4 to client */
                 if (server_busy) { 
-                    send_error(new_client_addr, 4, "Unexpected packet", sockfd);
+                    error_msg = "Unexpected packet";
+                    send_error_pck(new_client_addr, sockfd, 4, error_msg);
                     continue;
                 }
 
@@ -199,7 +254,8 @@ int main(int argc, char *argv[]) {
 
                 if (inputfile) {
                 /* file_name exists, send error */
-                    send_error(new_client_addr, 6, "File already exists", sockfd);
+                    error_msg = "File already exists";
+                    send_error_pck(new_client_addr, sockfd, 6, error_msg);
 					continue;
 				}
 
@@ -210,22 +266,23 @@ int main(int argc, char *argv[]) {
 
                 /* send ack to client */
                 memcpy(&curr_client_addr, &new_client_addr, sizeof(sockaddr_in));
-                send_ack(curr_client_addr, sockfd, curr_block);
+                send_ack_pck(curr_client_addr, curr_block, sockfd);
                 server_busy = true;
                 curr_block++;
             }
 
             /* data request */
-            else if (buffer_opcode == 3) {
+            else if (curr_opcode == 3) { //change from cuffer_opcode to curr_opcosr
 				
                 /* if server is not busy, send error msg 7 to client (unknown user) */
                 if (!server_busy) { 
-                    send_error(new_client_addr, 7, "Unknown user", sockfd);
+                    error_msg = "Unknown user";
+                    send_error_pck(new_client_addr, sockfd, 7, error_msg);
                     continue;
                 }
 
                 /* else, client is ok: create data packet */
-				struct data_pck_struct curr_data;
+				struct data_pck curr_data;
 
                 /* get opcode and block number */
                 memset(&curr_data, 0, sizeof(curr_data));
@@ -235,7 +292,8 @@ int main(int argc, char *argv[]) {
 				
                 /* check block number, if not equal send error */
 				if(curr_data.block_number != curr_block) {
-					send_error(curr_client_addr, 0, "Bad block number", sockfd);
+                    error_msg = "Bad block number";
+                    send_error_pck(curr_client_addr, sockfd, 0, error_msg);
 					continue;
 				}
 
@@ -243,7 +301,7 @@ int main(int argc, char *argv[]) {
                 outputfile.write(curr_data.data, rec_msg_size - 2*sizeof(short));
 
                 /* send ack to client */
-                send_ack(curr_client_addr, listening_socket, curr_block);
+                send_ack_pck(curr_client_addr, curr_block, sockfd);
 				curr_block++;
 
                 /* if last packet - close file and reset connection */
@@ -252,7 +310,7 @@ int main(int argc, char *argv[]) {
                 timeout_counter = 0;
                 curr_block = 0;
                 server_busy = false;
-                memset(&client_addr, 0, sizeof(client_addr));
+                memset(&curr_client_addr, 0, sizeof(curr_client_addr)); //change from client to curr_client
                 memset(&buffer, 0, sizeof(buffer));
                 /* reset timeout: */
                 FD_ZERO(&rfds);
@@ -272,38 +330,4 @@ int main(int argc, char *argv[]) {
     return 0;
 } 
 
-void send_error(struct sockaddr_in client_addr, int error_code, string error_msg, int socket) {
-    struct error_packet error_pckt;
-    error_pckt.error_opcode = htons(ERR_OPCODE);
-    error_pckt.error_code = htons(error_code);
-	
-    strcpy(error_pckt.error_msg, error_msg.c_str());
-	//cout << "*** SENDING ERR *** " << error_msg << endl; // DEBUG
-	//cout << "HOST error_pckt.error_opcode - " << ERR_OPCODE << ", error_pckt.error_code - " << error_code << endl; // DEBUG     cout << endl; // DEBUG
-    if(sendto(socket, &error_pckt, sizeof(error_pckt), 0 ,(struct sockaddr *) &client_addr, sizeof(client_addr)) 
-        != sizeof(error_pckt)) {
-        perror("TTFTP_ERROR: send_function error");
-        exit(1);
-    }
-}
 
-bool send_ack(struct sockaddr_in client_addr, int socket, short block_num) {
-    struct ack_packet ack_pckt;
-    ack_pckt.ack_opcode = htons(ACK_OPCODE);
-    ack_pckt.block_num = htons(block_num);
-	//cout << "*** SENDING ACK *** " << endl; // DEBUG
-	//cout << "HOST ack_pckt.ack_opcode - " << ACK_OPCODE << ", ack_pckt.block_num - " << block_num << endl; // DEBUG
-	//cout << "NETWORK ack_pckt.ack_opcode - " << ack_pckt.ack_opcode << ", ack_pckt.block_num - " << ack_pckt.block_num << endl; // DEBUG
-	if(sendto(socket, &ack_pckt, sizeof(struct ack_packet), 0 ,(struct sockaddr *) &client_addr, sizeof(client_addr))
-        != sizeof(struct ack_packet)) {
-        return false;
-    }
-    return true;
-}
-
-bool sockaddr_equal(struct sockaddr_in first_client_addr, struct sockaddr_in second_client_addr) {
-    if (first_client_addr.sin_addr.s_addr == second_client_addr.sin_addr.s_addr
-        && first_client_addr.sin_port == second_client_addr.sin_port)
-        return true;
-    return false;
-}
